@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { CustomizationTier, CustomizerState } from './types';
 import { PRESET_PHOTOCARDS, INITIAL_TEXT_CONFIG } from './data/options';
-import { calculatePrice } from './utils/pricing';
+import { TIER_OPTIONS, getTierSwitchWarning, normalizeDesignForTier } from './data/tiers';
 import { AppView, Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { TierSelector } from './components/TierSelector';
 import { CustomizerTools } from './components/CustomizerTools';
 import { AcrylicFramePreview } from './components/AcrylicFramePreview';
-import { PriceSummary } from './components/PriceSummary';
+import { DesignSummary } from './components/DesignSummary';
 import { DesignConfirmation } from './components/DesignConfirmation';
 import { HowItWorksModal } from './components/HowItWorksModal';
 import { AboutSection } from './components/AboutSection';
@@ -81,42 +81,12 @@ export const App: React.FC = () => {
     photocardUrl: PRESET_PHOTOCARDS[0].url,
     photocardName: PRESET_PHOTOCARDS[0].name,
     isCustomPhoto: false,
-    stickers: [
-      {
-        id: 'init-stk-1',
-        stickerId: 'pearl-sparkle',
-        symbol: '水晶四芒星',
-        xMm: 15.3,
-        yMm: 13.8,
-        widthMm: 7.5,
-        heightMm: 7.5,
-        rotation: -8,
-        color: '#fbcfe8',
-        zIndex: 20,
-        anchorTarget: 'frame'
-      },
-      {
-        id: 'init-stk-2',
-        stickerId: 'pastel-bow',
-        symbol: '柔粉蝴蝶結',
-        xMm: 69.7,
-        yMm: 16.1,
-        widthMm: 7.5,
-        heightMm: 7.5,
-        rotation: 12,
-        color: '#ffffff',
-        zIndex: 20,
-        anchorTarget: 'frame'
-      }
-    ],
+    stickers: [],
     text: INITIAL_TEXT_CONFIG
   });
 
   // Active selected sticker for rotation/size inspector
-  const [selectedStickerId, setSelectedStickerId] = useState<string | null>('init-stk-1');
-
-  // Calculate live dynamic price
-  const priceBreakdown = calculatePrice(customizerState);
+  const [selectedStickerId, setSelectedStickerId] = useState<string | null>(null);
 
   // State update handlers
   const handleUpdateState = (updates: Partial<CustomizerState>) => {
@@ -133,41 +103,29 @@ export const App: React.FC = () => {
         next.stickers = next.stickers.map(reposition);
         next.text = reposition(next.text);
       }
-      return next;
+      return normalizeDesignForTier(next);
     });
   };
 
   const handleUpdateStickerPosition = (id: string, xMm: number, yMm: number, anchorPosition?: import('./utils/dimensions').CardAnchor) => {
-    setCustomizerState((prev) => ({
+    setCustomizerState((prev) => normalizeDesignForTier({
       ...prev,
       stickers: prev.stickers.map((s) => (s.id === id ? { ...s, xMm, yMm, anchorTarget: anchorPosition ? 'card' : 'frame', anchorPosition, offsetXmm: anchorPosition ? 0 : undefined, offsetYmm: anchorPosition ? 0 : undefined } : s))
     }));
   };
 
   const handleUpdateTextPosition = (xMm: number, yMm: number, anchorPosition?: import('./utils/dimensions').CardAnchor) => {
-    setCustomizerState((prev) => ({
+    setCustomizerState((prev) => normalizeDesignForTier({
       ...prev,
       text: { ...prev.text, xMm, yMm, anchorTarget: anchorPosition ? 'card' : 'frame', anchorPosition, offsetXmm: anchorPosition ? 0 : undefined, offsetYmm: anchorPosition ? 0 : undefined }
     }));
   };
 
   const handleSelectTier = (tier: CustomizationTier) => {
-    // If selecting BASIC, clean up items not supported in BASIC
-    if (tier === 'BASIC') {
-      setCustomizerState((prev) => ({
-        ...prev,
-        tier,
-        backgroundId: 'bg-transparent',
-        customBgUrl: null,
-        stickers: [],
-        text: { ...prev.text, content: '' }
-      }));
-    } else {
-      setCustomizerState((prev) => ({
-        ...prev,
-        tier
-      }));
-    }
+    const warning = getTierSwitchWarning(customizerState.tier, tier);
+    if (warning && !window.confirm(warning)) return;
+    setCustomizerState((prev) => normalizeDesignForTier({ ...prev, tier }));
+    setSelectedStickerId(null);
     setCurrentView('customizer');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -214,7 +172,6 @@ export const App: React.FC = () => {
           currentView={currentView}
           onNavigate={handleNavigate}
           tier={customizerState.tier}
-          totalPrice={priceBreakdown.totalPrice}
           onFinishDesign={() => handleNavigate('confirmation')}
         />
       )}
@@ -253,11 +210,7 @@ export const App: React.FC = () => {
                   {customizerState.tier} 方案
                 </span>
                 <span className="text-xs text-slate-700 font-medium">
-                  {customizerState.tier === 'BASIC'
-                    ? '基本款：標準框體外型與邊緣顏色'
-                    : customizerState.tier === 'CUSTOM'
-                    ? '主題款：標準框體外型、顏色、背景、貼飾與文字'
-                    : '高度客製：全功能解鎖、小卡上傳、自由拖曳擺放'}
+                  {TIER_OPTIONS[customizerState.tier].name}：{TIER_OPTIONS[customizerState.tier].summary}
                 </span>
               </div>
 
@@ -325,11 +278,10 @@ export const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* Column 3: Right Summary & Live Pricing (4 cols) */}
+              {/* Column 3: Right Design Summary (4 cols) */}
               <div className="hidden lg:block lg:col-span-4 order-3 h-[580px] lg:sticky lg:top-24">
-                <PriceSummary
+                <DesignSummary
                   state={customizerState}
-                  priceBreakdown={priceBreakdown}
                   onFinishDesign={() => handleNavigate('confirmation')}
                 />
               </div>
@@ -338,7 +290,7 @@ export const App: React.FC = () => {
 
             {/* Mobile Bottom Sticky Bar */}
             <MobileStickyBar
-              priceBreakdown={priceBreakdown}
+              tier={customizerState.tier}
               onFinishDesign={() => handleNavigate('confirmation')}
             />
 
@@ -351,7 +303,6 @@ export const App: React.FC = () => {
             <div className="mx-auto max-w-5xl px-4 pt-6 sm:px-6 lg:px-8"><DesignProgress activeStep={3} /></div>
             <DesignConfirmation
               state={customizerState}
-              priceBreakdown={priceBreakdown}
               onModifyDesign={() => handleNavigate('customizer')}
               onChangeTier={() => handleNavigate('tiers')}
               onSubmitDesign={() => setIsSubmitModalOpen(true)}
@@ -389,7 +340,6 @@ export const App: React.FC = () => {
         isOpen={isSubmitModalOpen}
         onClose={() => setIsSubmitModalOpen(false)}
         state={customizerState}
-        priceBreakdown={priceBreakdown}
         onSuccess={(submission) => {
           setLastSubmission(submission);
           handleNavigate('success');
@@ -414,7 +364,7 @@ export const App: React.FC = () => {
               ONLYFRAME · K-pop / 二次元收藏小卡客製化展示框互動平台
             </p>
             <p className="text-[11px] text-slate-500">
-              企管系畢業專題 MVP 研究 Prototype ‧ 專利打樣與展示概念 ‧ 規格與價格均為暫定測試資料
+              企管系畢業專題 MVP 研究 Prototype ‧ 專利打樣與展示概念 ‧ 網站功能與產品規格為研究 Prototype 測試內容
             </p>
             <div className="pt-2 flex items-center justify-center gap-3 text-[11px] text-slate-400">
               <span>© 2026 ONLYFRAME 畢業專題研究團隊</span>

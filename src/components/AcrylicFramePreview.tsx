@@ -4,6 +4,7 @@ import { FRAME_OPTIONS, FRAME_COLOR_OPTIONS, BACKGROUND_OPTIONS } from '../data/
 import { CardAnchor, FRAME_WIDTH_MM, FRAME_HEIGHT_MM, MAGNET_CENTERS_MM, MAGNET_DIAMETER_MM, getCardAnchorMm, mmToPx, pxToMm } from '../utils/dimensions';
 import { Sparkles, Move } from 'lucide-react';
 import { StickerArtwork } from './StickerArtwork';
+import { normalizeDesignForTier } from '../data/tiers';
 
 interface AcrylicFramePreviewProps {
   state: CustomizerState;
@@ -16,7 +17,8 @@ interface AcrylicFramePreviewProps {
 
 const ANCHORS: CardAnchor[] = ['top-left', 'top-center', 'top-right', 'center-left', 'center-right', 'bottom-left', 'bottom-center', 'bottom-right'];
 
-export const AcrylicFramePreview: React.FC<AcrylicFramePreviewProps> = ({ state, onUpdateStickerPosition, selectedStickerId, onSelectSticker, onUpdateTextPosition, interactive = true }) => {
+export const AcrylicFramePreview: React.FC<AcrylicFramePreviewProps> = ({ state: inputState, onUpdateStickerPosition, selectedStickerId, onSelectSticker, onUpdateTextPosition, interactive = true }) => {
+  const state = normalizeDesignForTier(inputState);
   const frameOpt = FRAME_OPTIONS.find(f => f.id === state.frameStyleId) || FRAME_OPTIONS[0];
   const colorOpt = FRAME_COLOR_OPTIONS.find(c => c.id === state.frameColorId) || FRAME_COLOR_OPTIONS[0];
   const bgOpt = BACKGROUND_OPTIONS.find(b => b.id === state.backgroundId) || BACKGROUND_OPTIONS[0];
@@ -99,7 +101,7 @@ export const AcrylicFramePreview: React.FC<AcrylicFramePreviewProps> = ({ state,
 
       {MAGNET_CENTERS_MM.map(renderMagnet)}
 
-      {state.tier !== 'BASIC' && <div className="absolute inset-0 z-20 pointer-events-none">
+      {state.tier === 'PREMIUM' && <div className="absolute inset-0 z-20 pointer-events-none">
         {state.stickers.map(sticker => {
           const isSelected = selectedStickerId === sticker.id;
           const isDragging = draggingStickerId === sticker.id;

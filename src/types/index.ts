@@ -9,7 +9,6 @@ export interface FrameOption {
   borderWidth: string;
   hasScrews: boolean;
   screwType: 'silver' | 'gold' | 'black';
-  priceAddon: number;
 }
 
 export interface FrameColorOption {
@@ -27,7 +26,6 @@ export interface BackgroundOption {
   type: 'solid' | 'gradient' | 'pattern' | 'galaxy' | 'y2k' | 'custom';
   cssClass: string;
   backgroundStyle?: string;
-  priceAddon: number;
   isSpecial: boolean;
 }
 
@@ -36,7 +34,6 @@ export interface StickerOption {
   imageSrc: string;
   name: string;
   collection: 'pearl' | 'pastel';
-  priceAddon: number;
 }
 
 export interface PlacedSticker {
@@ -90,17 +87,6 @@ export interface CustomizerState {
   text: TextConfig;
 }
 
-export interface PriceItem {
-  label: string;
-  amount: number;
-}
-
-export interface PriceBreakdown {
-  basePrice: number;
-  addons: PriceItem[];
-  totalPrice: number;
-}
-
 export type SubmissionStatus = 'pending' | 'processing' | 'completed' | 'cancelled';
 
 export interface DesignSubmission {
@@ -111,6 +97,7 @@ export interface DesignSubmission {
   customer_email: string;
   plan: CustomizationTier;
   plan_name: string;
+  // Legacy database columns: neutral values only for schema compatibility.
   base_price: number;
   final_price: number;
   card_image_url: string;

@@ -33,7 +33,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onStartCustomizing }
           </div>
           <h3 className="text-lg font-bold text-slate-900">專題研究核心假說</h3>
           <p className="text-xs text-slate-600 leading-relaxed">
-            現代 K-pop 粉絲與二次元動漫收藏者對於專屬周邊展示有高度的情感連結與審美要求。本專題旨在驗證：<strong>提供階梯式自訂選項（基本款、主題款、高度客製）是否能顯著提升消費者的價值感知與購買意願？</strong>
+            現代 K-pop 粉絲與二次元動漫收藏者對於專屬周邊展示有高度的情感連結與審美要求。本專題旨在驗證：<strong>提供階梯式自訂選項（簡易客製、文字客製、自由客製）是否能顯著提升消費者的價值感知與購買意願？</strong>
           </p>
         </div>
 
@@ -58,10 +58,10 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onStartCustomizing }
         </div>
         
         <p className="text-xs text-slate-700 leading-relaxed">
-          目前本網站所呈現之尺寸（54×86mm 小卡卡槽、8mm 壓克力厚度、四角磁鐵吸附五金等）與各階方案預估價格（NT$199、NT$299、NT$399），均屬<strong>專題概念與 Prototype 暫定打樣規格</strong>。
+          目前本網站所呈現之尺寸（54×86mm 小卡卡槽、8mm 壓克力厚度、四角磁鐵吸附五金等），均屬<strong>專題概念與 Prototype 暫定打樣規格</strong>。
         </p>
         <p className="text-xs text-slate-600 leading-relaxed">
-          專題小組後續將進一步與台灣在地壓克力精密加工廠接洽，根據雷射切割、UV 直噴印刷、倒角拋光及強磁嵌入之實際工藝，進行實體打樣與成本核算。
+          專題小組後續將進一步與台灣在地壓克力精密加工廠接洽，根據雷射切割、UV 直噴印刷、倒角拋光及強磁嵌入之實際工藝，進行實體打樣與製程驗證。
         </p>
 
         <div className="pt-2 flex flex-wrap gap-2 text-[11px] font-mono text-slate-600">

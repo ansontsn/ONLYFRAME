@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { CustomizerState, DesignSubmission, SubmissionStatus } from '../types';
-import { calculatePrice } from '../utils/pricing';
+import { normalizeDesignForTier, getTierLabel } from '../data/tiers';
 import { FRAME_OPTIONS, FRAME_COLOR_OPTIONS, BACKGROUND_OPTIONS, FONT_OPTIONS, STICKER_OPTIONS } from '../data/options';
 import { centeredCardPosition, FRAME_WIDTH_MM, FRAME_HEIGHT_MM, isCardSizeSupported } from '../utils/dimensions';
 
@@ -95,7 +95,7 @@ export const uploadImageToStorage = async (
 
 /**
  * 送出設計核心 API
- * 1. 嚴格在伺服器端邏輯重新驗證價格（防竄改）
+ * 1. 依所選方案清除不支援的設計元素
  * 2. 上傳小卡至 card-images
  * 3. 上傳預覽圖至 design-previews
  * 4. 寫入 design_submissions
@@ -106,16 +106,12 @@ export const submitDesignToBackend = async (params: {
   state: CustomizerState;
   previewBlob?: Blob | null;
 }): Promise<DesignSubmission> => {
-  const { customerName, customerEmail, state, previewBlob } = params;
+  const { customerName, customerEmail, previewBlob } = params;
+  const state = normalizeDesignForTier(params.state);
 
   if (!isCardSizeSupported(state.cardWidthMm, state.cardHeightMm)) {
     throw new Error('小卡尺寸超出 ONLYFRAME 標準框目前建議支援範圍，請先調整尺寸。');
   }
-
-  // 1. 重新驗證價格（防前端竄改 final_price）
-  const verifiedPricing = calculatePrice(state);
-  const basePrice = verifiedPricing.basePrice;
-  const finalPrice = verifiedPricing.totalPrice;
 
   // 2. 處理小卡圖片上傳
   let cardImageUrl = state.photocardUrl;
@@ -143,12 +139,6 @@ export const submitDesignToBackend = async (params: {
   const colorOpt = FRAME_COLOR_OPTIONS.find(c => c.id === state.frameColorId) || FRAME_COLOR_OPTIONS[0];
   const bgOpt = BACKGROUND_OPTIONS.find(b => b.id === state.backgroundId) || BACKGROUND_OPTIONS[0];
   const fontOpt = FONT_OPTIONS.find(f => f.id === state.text.font) || FONT_OPTIONS[0];
-
-  const planNameMap: Record<string, string> = {
-    BASIC: 'BASIC 基本款',
-    CUSTOM: 'CUSTOM 主題款',
-    PREMIUM: 'PREMIUM 高度客製款'
-  };
 
   const decorationsSummary = state.stickers.length > 0
     ? `${state.stickers.length} 枚貼飾 (${state.stickers.map(s => STICKER_OPTIONS.find(option => option.id === s.stickerId)?.name || s.symbol).join('、')})`
@@ -193,8 +183,7 @@ export const submitDesignToBackend = async (params: {
     photocardName: state.photocardName,
     isCustomPhoto: state.isCustomPhoto,
     stickers: state.stickers,
-    text: state.text,
-    verifiedPricing: verifiedPricing
+    text: state.text
   };
 
   const newSubmission: DesignSubmission = {
@@ -204,9 +193,10 @@ export const submitDesignToBackend = async (params: {
     customer_name: customerName.trim(),
     customer_email: customerEmail.trim(),
     plan: state.tier,
-    plan_name: planNameMap[state.tier] || state.tier,
-    base_price: basePrice,
-    final_price: finalPrice,
+    plan_name: getTierLabel(state.tier),
+    // Existing databases require these legacy columns. No calculation or display.
+    base_price: 0,
+    final_price: 0,
     card_image_url: cardImageUrl,
     frame_style: frameOpt.name,
     frame_color: colorOpt.name,

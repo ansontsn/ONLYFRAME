@@ -1,6 +1,7 @@
 import React from 'react';
 import { Layers, ShieldCheck } from 'lucide-react';
 import { CustomizationTier } from '../types';
+import { TIER_OPTIONS } from '../data/tiers';
 
 export type AppView = 'home' | 'tiers' | 'customizer' | 'confirmation' | 'about' | 'success' | 'admin';
 
@@ -8,7 +9,6 @@ interface NavbarProps {
   currentView: AppView;
   onNavigate: (view: AppView) => void;
   tier: CustomizationTier;
-  totalPrice?: number;
   onFinishDesign?: () => void;
 }
 
@@ -16,7 +16,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   currentView,
   onNavigate,
   tier,
-  totalPrice,
   onFinishDesign
 }) => {
   return (
@@ -31,7 +30,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <img 
             src="/logo-combination.png" 
             alt="ONLYFRAME" 
-            className="h-9 sm:h-11 md:h-12 w-auto object-contain max-w-[210px] sm:max-w-none transition-transform duration-200 group-hover:scale-[1.02]" 
+            className="h-9 sm:h-11 md:h-12 w-auto object-contain max-w-[min(210px,calc(100vw-9rem))] sm:max-w-none transition-transform duration-200 group-hover:scale-[1.02]"
           />
           <span className="hidden sm:inline-block text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-pink-500/10 text-pink-600 border border-pink-500/20">
             PROTOTYPE
@@ -96,12 +95,12 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Action Button & Status */}
         <div className="flex items-center gap-2.5 sm:gap-3">
-          {currentView === 'customizer' && totalPrice !== undefined && (
+          {currentView === 'customizer' && (
             <div className="hidden sm:flex flex-col items-end mr-2">
               <span className="text-[10px] uppercase tracking-wider text-pink-600 font-mono font-bold">
                 {tier} 方案
               </span>
-              <span className="text-sm font-extrabold text-slate-900">NT${totalPrice}</span>
+              <span className="text-sm font-extrabold text-slate-900">{TIER_OPTIONS[tier].name}</span>
             </div>
           )}
 

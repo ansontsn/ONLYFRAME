@@ -18,32 +18,32 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({
     {
       step: '01',
       title: '選擇客製化程度',
-      desc: '依據個人需求選擇 BASIC（基本款）、CUSTOM（主題款）或 PREMIUM（高度客製）。不用一次面對複雜功能。',
+      desc: '依據個人需求選擇 BASIC（簡易客製）、CUSTOM（文字客製）或 PREMIUM（自由客製）。不用一次面對複雜功能。',
       icon: Sliders
     },
     {
       step: '02',
       title: '進入互動式編輯器',
-      desc: '系統根據您選擇的方案開放對應工具。框體採固定標準外型，可調整透光顏色、更換主題背景或上傳專屬小卡。',
+      desc: '系統根據您選擇的方案開放對應工具。三種方案皆可上傳小卡與選框色；CUSTOM 以上可加入文字；PREMIUM 可選主題背景與自由裝飾。',
       icon: Palette
     },
     {
       step: '03',
       title: '即時光影 3D 預覽',
-      desc: '每一次顏色、背景、刻字或貼飾的更動，中央壓克力展示框都會零時差即時反應，並即時更新透明預估價格。',
+      desc: '每一次顏色、背景、刻字或貼飾的更動，中央壓克力展示框都會零時差即時反應。',
       icon: Eye
     },
     {
       step: '04',
       title: '完成專屬展示框',
-      desc: '確認最終成品規格清單與價格試算，保存您的專屬展示框設計概念！',
+      desc: '確認最終設計內容與規格清單，保存您的專屬展示框設計概念！',
       icon: CheckCircle
     }
   ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl rounded-3xl bg-[#12141c] border border-white/15 p-6 sm:p-8 shadow-2xl space-y-6">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#12141c] border border-white/15 p-6 sm:p-8 shadow-2xl space-y-6">
         
         {/* Close Button */}
         <button

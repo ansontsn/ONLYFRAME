@@ -1,4 +1,5 @@
 import React from 'react';
+import { TIER_OPTIONS, TIER_ORDER } from '../data/tiers';
 import { ArrowDown, ArrowRight, Check, Layers, ShieldCheck, Sparkles } from 'lucide-react';
 
 interface HeroSectionProps {
@@ -22,7 +23,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onStartCustomizing, on
               讓喜歡的收藏，<span className="text-pink-600">成為日常風景。</span>
             </h1>
             <p className="max-w-xl text-base leading-8 text-slate-600 sm:text-lg">
-              從選擇展示框到親手編排卡面，先在畫面上預覽專屬設計，再了解方案與暫定價格。
+              從選擇展示框到親手編排卡面，先在畫面上預覽專屬設計，再了解不同方案可以調整的內容。
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -31,7 +32,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onStartCustomizing, on
               了解設計流程 <ArrowDown className="h-4 w-4" />
             </button>
           </div>
-          <p className="text-xs leading-5 text-slate-500">方案 NT$199 起，為專題 Prototype 暫定估價；目前不提供實際購買或付款。</p>
+          <p className="text-xs leading-5 text-slate-500">依照你想參與設計的程度選擇方案。三種方案都能上傳自己的小卡進行即時預覽。</p>
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium text-slate-600">
             <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600" />即時設計預覽</span>
             <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600" />三種客製程度</span>
@@ -54,7 +55,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onStartCustomizing, on
             </div>
             <div className="mt-4 flex items-center justify-between rounded-xl bg-[#f8f6f3] px-4 py-3">
               <span className="text-xs font-medium text-slate-600">畫面示意，實際規格待打樣確認</span>
-              <span className="text-xs font-bold text-slate-900">NT$199 起*</span>
+              <span className="text-xs font-bold text-slate-900">三種客製程度</span>
             </div>
           </div>
         </div>
@@ -94,9 +95,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onStartCustomizing, on
         </div>
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           {[
-            { n: '01', title: '選擇客製程度', body: '先看各方案能調整的項目與暫定價格。', icon: Layers },
-            { n: '02', title: '編排專屬樣式', body: '試選框色、背景、貼飾與文字，即時預覽。', icon: Sparkles },
-            { n: '03', title: '預覽並確認', body: '確認設計與價格；送出前仍可返回修改。', icon: ShieldCheck },
+            { n: '01', title: '選擇客製程度', body: '先了解各方案可以調整的項目與客製程度。', icon: Layers },
+            { n: '02', title: '編排專屬樣式', body: '依方案調整框色、文字、背景與裝飾，即時預覽。', icon: Sparkles },
+            { n: '03', title: '預覽並確認', body: '確認你的設計內容；送出前仍可返回修改。', icon: ShieldCheck },
           ].map(({ n, title, body, icon: Icon }) => <div key={n} className="rounded-2xl border border-stone-200 bg-white p-6"><div className="flex items-center justify-between"><span className="text-xs font-black tracking-widest text-pink-600">STEP {n}</span><Icon className="h-5 w-5 text-slate-400" /></div><h3 className="mt-5 text-lg font-bold text-slate-900">{title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{body}</p></div>)}
         </div>
       </div>
@@ -105,14 +106,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onStartCustomizing, on
     <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
       <div className="mx-auto max-w-2xl text-center"><p className="text-xs font-bold uppercase tracking-[.2em] text-pink-600">CHOOSE YOUR DETAIL</p><h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950">從簡單搭配，到自由創作</h2><p className="mt-3 text-sm leading-6 text-slate-600">先選你想參與設計的程度，進入編輯器後還能隨時調整。</p></div>
       <div className="mt-8 grid gap-4 md:grid-cols-3">
-        {[
-          { title: '簡易客製', tier: 'BASIC', price: 'NT$199', note: '標準框體與外觀色', detail: '保留簡潔，專注挑選展示框外觀色。' },
-          { title: '主題客製', tier: 'CUSTOM', price: 'NT$299', note: '背景、貼飾與文字', detail: '加入主題氛圍與個人化細節。', featured: true },
-          { title: '完全客製', tier: 'PREMIUM', price: 'NT$399 起', note: '含個人小卡上傳', detail: '以自己的小卡預覽整體設計。' },
-        ].map((plan) => <article key={plan.tier} className={`relative rounded-3xl border p-6 ${plan.featured ? 'border-pink-300 bg-pink-50/60 shadow-lg shadow-pink-100' : 'border-stone-200 bg-white'}`}>
-          {plan.featured && <span className="absolute right-5 top-5 rounded-full bg-pink-600 px-2.5 py-1 text-[10px] font-bold text-white">推薦體驗</span>}
-          <p className="text-xs font-bold tracking-widest text-slate-500">{plan.tier}</p><h3 className="mt-2 text-xl font-black text-slate-950">{plan.title}</h3><p className="mt-1 text-sm text-slate-600">{plan.detail}</p>
-          <div className="mt-6 border-t border-stone-200 pt-4"><p className="text-2xl font-black text-slate-950">{plan.price}<span className="ml-2 text-xs font-medium text-slate-500">暫定估價</span></p><p className="mt-1 text-xs text-slate-500">{plan.note}</p></div>
+        {TIER_ORDER.map((tier) => ({ tier, ...TIER_OPTIONS[tier] })).map((plan) => <article key={plan.tier} className={`relative rounded-3xl border p-6 ${plan.tier === 'CUSTOM' ? 'border-pink-300 bg-pink-50/60 shadow-lg shadow-pink-100' : 'border-stone-200 bg-white'}`}>
+          <span className="absolute right-5 top-5 rounded-full bg-pink-50 px-2.5 py-1 text-[10px] font-bold text-pink-700">{plan.level}</span>
+          <p className="text-xs font-bold tracking-widest text-slate-500">{plan.tier}</p><h3 className="mt-2 text-xl font-black text-slate-950">{plan.name}</h3><p className="mt-1 text-sm text-slate-600">{plan.description}</p>
+          <div className="mt-6 border-t border-stone-200 pt-4"><p className="text-lg font-black text-slate-950">{plan.headline}</p><p className="mt-1 text-xs text-slate-500">{plan.summary}</p></div>
         </article>)}
       </div>
       <div className="mt-6 text-center"><button onClick={onStartCustomizing} className={primaryButton}>開始設計 <ArrowRight className="h-4 w-4" /></button></div>
@@ -132,14 +129,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onStartCustomizing, on
         <div className="mt-6 grid gap-3 sm:grid-cols-2">{[{ title: '透明壓克力概念', text: '以層次與透光效果襯托收藏，實際材質與表面處理待確認。' }, { title: '多層展示結構', text: '目前設計稿以雙層、約 8mm 結構為示意，不代表量產規格。' }, { title: '卡片適配參考', text: '原型以 54 × 86mm 卡片為參考，適配範圍待打樣確認。' }, { title: '個人化外觀', text: '框色、背景與裝飾可在編輯器中搭配預覽。' }].map((spec) => <div key={spec.title} className="rounded-2xl border border-stone-200 bg-white p-4"><h3 className="text-sm font-bold text-slate-900">{spec.title}</h3><p className="mt-1.5 text-xs leading-5 text-slate-600">{spec.text}</p></div>)}</div>
       </div>
       <div className="rounded-3xl border border-stone-200 bg-[#f8f6f3] p-6 sm:p-8"><p className="text-xs font-bold uppercase tracking-[.18em] text-slate-500">AT A GLANCE</p><h3 className="mt-2 text-xl font-black text-slate-950">一般小卡框與 ONLYFRAME 概念</h3>
-        <div className="mt-5 divide-y divide-stone-200 text-sm"><div className="grid grid-cols-[1fr_1fr] gap-3 py-3"><span className="font-semibold text-slate-700">展示方式</span><span className="text-slate-600">固定外觀 ／ 可調整視覺方案</span></div><div className="grid grid-cols-[1fr_1fr] gap-3 py-3"><span className="font-semibold text-slate-700">個人化內容</span><span className="text-slate-600">依框款而定 ／ 背景、貼飾、文字</span></div><div className="grid grid-cols-[1fr_1fr] gap-3 py-3"><span className="font-semibold text-slate-700">購買前預覽</span><span className="text-slate-600">視商品而定 ／ 網頁即時模擬</span></div></div>
-        <p className="mt-4 rounded-xl bg-white p-3 text-[11px] leading-5 text-slate-500">比較描述的是本網站 Prototype 的設計方向，不構成對市售產品的品質或價格評比。</p>
+        <div className="mt-5 divide-y divide-stone-200 text-sm"><div className="grid grid-cols-[1fr_1fr] gap-3 py-3"><span className="font-semibold text-slate-700">展示方式</span><span className="text-slate-600">固定外觀 ／ 可調整視覺方案</span></div><div className="grid grid-cols-[1fr_1fr] gap-3 py-3"><span className="font-semibold text-slate-700">個人化內容</span><span className="text-slate-600">依框款而定 ／ 背景、貼飾、文字</span></div><div className="grid grid-cols-[1fr_1fr] gap-3 py-3"><span className="font-semibold text-slate-700">設計預覽</span><span className="text-slate-600">視商品而定 ／ 網頁即時模擬</span></div></div>
+        <p className="mt-4 rounded-xl bg-white p-3 text-[11px] leading-5 text-slate-500">比較描述的是本網站 Prototype 的設計方向，不構成對市售產品的品質評比。</p>
       </div>
     </section>
 
     <section className="border-t border-stone-200 bg-pink-50/60 px-4 py-14 text-center sm:py-16">
       <p className="text-xs font-bold uppercase tracking-[.2em] text-pink-600">YOUR COLLECTION, YOUR WAY</p><h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950">來試著設計你的展示方式</h2><p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-600">選擇客製程度、調整畫面，再看看不同元素組合起來的樣子。</p><button onClick={onStartCustomizing} className={`${primaryButton} mt-6`}>開始設計 <ArrowRight className="h-4 w-4" /></button>
-      <p className="mt-4 text-[11px] text-slate-500">研究用 Prototype · 暫定價格與規格不代表正式販售內容</p>
+      <p className="mt-4 text-[11px] text-slate-500">研究用 Prototype · 網站內容與產品規格僅供畢業專題研究與展示使用</p>
     </section>
   </div>
 );

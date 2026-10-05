@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { TIER_OPTIONS, getTierLabel } from '../data/tiers';
 import { DesignSubmission } from '../types';
 import { 
   CheckCircle2, 
@@ -69,9 +70,9 @@ export const SubmissionSuccessView: React.FC<SubmissionSuccessViewProps> = ({
           </div>
 
           <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center">
-            <span className="text-xs text-slate-400 font-medium">預估價格</span>
+            <span className="text-xs text-slate-400 font-medium">客製程度</span>
             <span className="text-2xl sm:text-3xl font-black text-pink-600 font-mono">
-              NT${submission.final_price}
+              {TIER_OPTIONS[submission.plan].level}
             </span>
           </div>
         </div>
@@ -80,11 +81,11 @@ export const SubmissionSuccessView: React.FC<SubmissionSuccessViewProps> = ({
         <div className="grid grid-cols-2 gap-4 text-xs">
           <div className="p-3 rounded-2xl bg-stone-50 border border-stone-200/80">
             <span className="text-[10px] text-slate-400 font-medium block">客製方案</span>
-            <span className="font-bold text-slate-800 text-sm mt-0.5 block">{submission.plan_name}</span>
+            <span className="font-bold text-slate-800 text-sm mt-0.5 block">{getTierLabel(submission.plan)}</span>
           </div>
 
           <div className="p-3 rounded-2xl bg-stone-50 border border-stone-200/80">
-            <span className="text-[10px] text-slate-400 font-medium block">訂單狀態</span>
+            <span className="text-[10px] text-slate-400 font-medium block">設計狀態</span>
             <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
               待處理 (Pending)
             </span>

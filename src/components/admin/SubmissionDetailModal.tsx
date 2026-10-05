@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DesignSubmission, SubmissionStatus } from '../../types';
+import { TIER_OPTIONS, getTierLabel } from '../../data/tiers';
 import { updateSubmissionStatus } from '../../lib/supabase';
 import { 
   X, 
@@ -26,6 +27,7 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({
   onClose,
   onStatusChange
 }) => {
+  const { verifiedPricing: _legacyCalculation, ...displayDesignData } = submission.design_data;
   const [currentStatus, setCurrentStatus] = useState<SubmissionStatus>(submission.status);
   const [isUpdating, setIsUpdating] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
@@ -124,21 +126,21 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({
           </div>
         </div>
 
-        {/* Pricing & Plan Banner */}
+        {/* Plan Banner */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="p-4 rounded-2xl bg-white border border-stone-200 shadow-sm">
             <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block">方案規格</span>
-            <span className="text-base font-black text-slate-900 block mt-0.5">{submission.plan_name}</span>
+            <span className="text-base font-black text-slate-900 block mt-0.5">{getTierLabel(submission.plan)}</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-white border border-stone-200 shadow-sm">
-            <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block">基礎方案費</span>
-            <span className="text-base font-bold text-slate-700 block mt-0.5 font-mono">NT${submission.base_price}</span>
+            <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block">客製程度</span>
+            <span className="text-base font-bold text-slate-700 block mt-0.5 font-mono">{TIER_OPTIONS[submission.plan].level}</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-white border border-stone-200 shadow-sm">
-            <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block">後端核算最終預估總額</span>
-            <span className="text-lg font-black text-pink-600 block mt-0.5 font-mono">NT${submission.final_price}</span>
+            <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block">方案功能摘要</span>
+            <span className="text-lg font-black text-pink-600 block mt-0.5 font-mono">{TIER_OPTIONS[submission.plan].summary}</span>
           </div>
         </div>
 
@@ -253,7 +255,7 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({
                   <span>完整 JSON 設計資料 (可還原)</span>
                 </h4>
                 <button
-                  onClick={() => copyToClipboard(JSON.stringify(submission.design_data, null, 2), true)}
+                  onClick={() => copyToClipboard(JSON.stringify(displayDesignData, null, 2), true)}
                   className="px-2.5 py-1 rounded-lg bg-white border border-stone-200 text-slate-600 hover:text-slate-900 text-xs font-semibold flex items-center gap-1 shadow-sm"
                 >
                   {copiedJson ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
@@ -262,7 +264,7 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({
               </div>
 
               <pre className="p-3.5 rounded-2xl bg-stone-900 text-emerald-400 font-mono text-[11px] overflow-x-auto max-h-52 shadow-inner">
-                {JSON.stringify(submission.design_data, null, 2)}
+                {JSON.stringify(displayDesignData, null, 2)}
               </pre>
             </div>
 

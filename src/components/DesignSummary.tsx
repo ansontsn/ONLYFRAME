@@ -1,23 +1,22 @@
 import React from 'react';
-import { CustomizerState, PriceBreakdown } from '../types';
+import { CustomizerState } from '../types';
+import { TIER_OPTIONS, getTierLabel } from '../data/tiers';
 import { FRAME_OPTIONS, FRAME_COLOR_OPTIONS, BACKGROUND_OPTIONS } from '../data/options';
 import { ArrowRight, Tag, Info, Check } from 'lucide-react';
 
-interface PriceSummaryProps {
+interface DesignSummaryProps {
   state: CustomizerState;
-  priceBreakdown: PriceBreakdown;
   onFinishDesign: () => void;
 }
 
 const TIER_BADGES: Record<string, { label: string; color: string }> = {
-  BASIC: { label: 'BASIC 基本款', color: 'text-slate-300 bg-slate-800 border-slate-700' },
-  CUSTOM: { label: 'CUSTOM 主題款', color: 'text-purple-300 bg-purple-950/60 border-purple-800' },
-  PREMIUM: { label: 'PREMIUM 高度客製', color: 'text-pink-300 bg-pink-950/60 border-pink-800' }
+  BASIC: { label: getTierLabel('BASIC'), color: 'text-slate-300 bg-slate-800 border-slate-700' },
+  CUSTOM: { label: getTierLabel('CUSTOM'), color: 'text-purple-300 bg-purple-950/60 border-purple-800' },
+  PREMIUM: { label: getTierLabel('PREMIUM'), color: 'text-pink-300 bg-pink-950/60 border-pink-800' }
 };
 
-export const PriceSummary: React.FC<PriceSummaryProps> = ({
+export const DesignSummary: React.FC<DesignSummaryProps> = ({
   state,
-  priceBreakdown,
   onFinishDesign
 }) => {
   const frameOpt = FRAME_OPTIONS.find(f => f.id === state.frameStyleId) || FRAME_OPTIONS[0];
@@ -68,14 +67,14 @@ export const PriceSummary: React.FC<PriceSummaryProps> = ({
           <div className="flex justify-between items-center py-1">
             <span className="text-slate-400">背景樣式:</span>
             <span className="font-semibold text-white truncate max-w-[140px] text-right">
-              {state.tier === 'BASIC' ? '原色透亮 (基本)' : bgOpt.name}
+              {TIER_OPTIONS[state.tier].background ? bgOpt.name : '原色透亮'}
             </span>
           </div>
 
           <div className="flex justify-between items-center py-1">
             <span className="text-slate-400">原創貼飾:</span>
             <span className="font-semibold text-white">
-              {state.tier === 'BASIC' ? '無' : `${state.stickers.length} 枚`}
+              {TIER_OPTIONS[state.tier].stickers ? `${state.stickers.length} 枚` : '無'}
             </span>
           </div>
 
@@ -94,44 +93,27 @@ export const PriceSummary: React.FC<PriceSummaryProps> = ({
           </div>
         </div>
 
-        {/* Dynamic Pricing Engine Breakdown */}
+        {/* Available customization tools */}
         <div className="space-y-2 pt-1">
           <span className="text-xs font-bold text-slate-400 block uppercase tracking-wider">
-            動態價格明細
+            目前可調整的內容
           </span>
 
           <div className="space-y-1.5 text-xs">
-            <div className="flex justify-between text-slate-300">
-              <span>{badge.label} 基礎價格</span>
-              <span className="font-mono font-bold text-white">NT${priceBreakdown.basePrice}</span>
-            </div>
-
-            {priceBreakdown.addons.map((addon, index) => (
-              <div key={index} className="flex justify-between text-pink-300/90 text-[11px]">
+            {['框體外觀', ...(TIER_OPTIONS[state.tier].text ? ['自訂文字與配置'] : []), ...(TIER_OPTIONS[state.tier].background ? ['主題背景', '自由裝飾：位置、大小、旋轉與多元素配置'] : [])].map((feature) => (
+              <div key={feature} className="flex text-pink-300/90 text-[11px]">
                 <span className="flex items-center gap-1">
                   <Check className="w-3 h-3 text-pink-400" />
-                  {addon.label}
+                  {feature}
                 </span>
-                <span className="font-mono font-semibold">+NT${addon.amount}</span>
               </div>
             ))}
           </div>
 
-          {/* Grand Total Price */}
-          <div className="mt-3 p-3.5 rounded-xl bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border border-pink-500/20 flex items-baseline justify-between">
-            <div>
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                即時試算總額
-              </span>
-              <span className="text-xs text-pink-400">
-                {priceBreakdown.addons.length > 0 ? '包含客製選配項目' : '基本方案價'}
-              </span>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-black bg-gradient-to-r from-pink-400 to-purple-300 bg-clip-text text-transparent font-mono">
-                NT${priceBreakdown.totalPrice}
-              </div>
-            </div>
+          <div className="mt-3 p-3.5 rounded-xl bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border border-pink-500/20 space-y-1">
+            <span className="text-[10px] font-bold text-slate-400 block">{TIER_OPTIONS[state.tier].level}</span>
+            <p className="text-sm font-bold text-pink-300">{TIER_OPTIONS[state.tier].summary}</p>
+            <p className="text-[11px] text-slate-400">小卡上傳與即時預覽為三種方案的共同工具。</p>
           </div>
         </div>
 
@@ -139,7 +121,7 @@ export const PriceSummary: React.FC<PriceSummaryProps> = ({
         <div className="flex items-start gap-2 p-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-[11px] text-slate-400">
           <Info className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
           <p className="leading-tight">
-            * 實體商品為客製壓克力展示框（出貨不含小卡）。金額為概念樣品預估打樣參考價。
+            網站內容與產品規格僅供畢業專題研究與展示使用，不進行實際販售。
           </p>
         </div>
 

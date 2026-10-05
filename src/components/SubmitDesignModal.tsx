@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { CustomizerState, PriceBreakdown, DesignSubmission } from '../types';
+import { CustomizerState, DesignSubmission } from '../types';
 import { submitDesignToBackend, dataUrlToBlob } from '../lib/supabase';
 import { toPng } from 'html-to-image';
+import { getTierLabel, TIER_OPTIONS } from '../data/tiers';
 import { isCardSizeSupported } from '../utils/dimensions';
 import { 
   X, 
@@ -16,7 +17,6 @@ interface SubmitDesignModalProps {
   isOpen: boolean;
   onClose: () => void;
   state: CustomizerState;
-  priceBreakdown: PriceBreakdown;
   onSuccess: (submission: DesignSubmission) => void;
 }
 
@@ -24,7 +24,6 @@ export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
   isOpen,
   onClose,
   state,
-  priceBreakdown,
   onSuccess
 }) => {
   const [customerName, setCustomerName] = useState('');
@@ -59,14 +58,9 @@ export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
       errors.push('電子信箱格式不正確，請檢查輸入');
     }
 
-    // 4. Premium 若啟用自訂照片但無圖片
-    if (state.tier === 'PREMIUM' && state.isCustomPhoto && !state.photocardUrl) {
-      errors.push('高度客製方案已選擇上傳個人小卡，請先上傳小卡圖片後再送出');
-    }
-
-    // 5. 價格驗證
-    if (!priceBreakdown || priceBreakdown.totalPrice <= 0) {
-      errors.push('尚未計算出有效預估價格');
+    // 4. 所有方案的自訂小卡預覽驗證
+    if (state.isCustomPhoto && !state.photocardUrl) {
+      errors.push('已選擇上傳自己的小卡，請先上傳小卡圖片後再送出');
     }
 
     setValidationErrors(errors);
@@ -98,7 +92,7 @@ export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
         }
       }
 
-      // 2. 送出至後端 (含價格核算、圖片上傳至 Storage、寫入 Database)
+      // 2. 送出至後端 (圖片上傳至 Storage、寫入 Database)
       setLoadingStep('正在上傳設計參數與圖片至雲端儲存空間……');
       const submission = await submitDesignToBackend({
         customerName,
@@ -120,7 +114,7 @@ export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg rounded-3xl bg-[#FAF8F5] border border-stone-200 shadow-2xl p-6 sm:p-7 space-y-5 text-slate-800">
+      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl bg-[#FAF8F5] border border-stone-200 shadow-2xl p-6 sm:p-7 space-y-5 text-slate-800">
         
         {/* Close Button */}
         <button
@@ -167,11 +161,11 @@ export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
           <div className="p-3.5 rounded-2xl bg-white/80 border border-stone-200/80 shadow-sm flex items-center justify-between text-xs">
             <div>
               <span className="text-[10px] text-slate-400 font-mono block">方案配置</span>
-              <span className="font-bold text-slate-800">{state.tier} 款展示框</span>
+              <span className="font-bold text-slate-800">{getTierLabel(state.tier)}</span>
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-slate-400 font-mono block">後端核算預估額</span>
-              <span className="font-black text-pink-600 text-sm font-mono">NT${priceBreakdown.totalPrice}</span>
+              <span className="text-[10px] text-slate-400 font-mono block">客製程度</span>
+              <span className="font-black text-pink-600 text-sm font-mono">{TIER_OPTIONS[state.tier].level}</span>
             </div>
           </div>
 

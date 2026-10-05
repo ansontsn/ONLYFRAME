@@ -1,24 +1,25 @@
 import React from 'react';
-import { PriceBreakdown } from '../types';
+import { CustomizationTier } from '../types';
+import { TIER_OPTIONS } from '../data/tiers';
 import { ArrowRight } from 'lucide-react';
 
 interface MobileStickyBarProps {
-  priceBreakdown: PriceBreakdown;
+  tier: CustomizationTier;
   onFinishDesign: () => void;
 }
 
 export const MobileStickyBar: React.FC<MobileStickyBarProps> = ({
-  priceBreakdown,
+  tier,
   onFinishDesign
 }) => {
   return (
     <div className="lg:hidden fixed bottom-14 sm:bottom-12 inset-x-3 z-40 bg-white/95 border border-pink-500/30 p-3 rounded-2xl backdrop-blur-xl flex items-center justify-between shadow-[0_10px_35px_rgba(0,0,0,0.12)]">
       <div className="pl-1.5">
         <span className="text-[10px] text-slate-500 uppercase font-mono block tracking-wider font-semibold">
-          預估打樣總額
+          {tier} · {TIER_OPTIONS[tier].level}
         </span>
-        <div className="text-xl font-black text-pink-600 font-mono leading-none mt-0.5">
-          NT${priceBreakdown.totalPrice}
+        <div className="text-base font-black text-pink-600 leading-none mt-0.5">
+          {TIER_OPTIONS[tier].name}
         </div>
       </div>
 

@@ -81,8 +81,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToStore })
     const customCount = submissions.filter(s => s.plan === 'CUSTOM').length;
     const premiumCount = submissions.filter(s => s.plan === 'PREMIUM').length;
     
-    const totalPrice = submissions.reduce((sum, s) => sum + (s.final_price || 0), 0);
-    const avgPrice = total > 0 ? Math.round(totalPrice / total) : 0;
 
     const todayStr = new Date().toISOString().slice(0, 10);
     const todayCount = submissions.filter(s => s.created_at && s.created_at.slice(0, 10) === todayStr).length;
@@ -92,7 +90,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToStore })
       basicCount,
       customCount,
       premiumCount,
-      avgPrice,
       todayCount
     };
   }, [submissions]);
@@ -155,11 +152,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToStore })
   const getPlanBadge = (plan: CustomizationTier) => {
     switch (plan) {
       case 'BASIC':
-        return <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-stone-100 text-stone-700 border border-stone-300">Basic</span>;
+        return <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-stone-100 text-stone-700 border border-stone-300">BASIC 簡易客製</span>;
       case 'CUSTOM':
-        return <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-purple-100 text-purple-700 border border-purple-200">Custom</span>;
+        return <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-purple-100 text-purple-700 border border-purple-200">CUSTOM 文字客製</span>;
       case 'PREMIUM':
-        return <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-pink-100 text-pink-700 border border-pink-200">Premium</span>;
+        return <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-pink-100 text-pink-700 border border-pink-200">PREMIUM 自由客製</span>;
       default:
         return <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-stone-100 text-stone-700">{plan}</span>;
     }
@@ -225,8 +222,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToStore })
 
       <div className="max-w-7xl mx-auto space-y-6">
 
-        {/* 6 Key Metrics Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+        {/* Research metrics */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
           
           <div className="p-4 rounded-2xl bg-white border border-stone-200 shadow-sm space-y-1">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">總設計數</span>
@@ -235,27 +232,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToStore })
           </div>
 
           <div className="p-4 rounded-2xl bg-white border border-stone-200 shadow-sm space-y-1">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Basic 入門款</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">BASIC 簡易客製</span>
             <div className="text-2xl font-black text-slate-800 font-mono">{metrics.basicCount}</div>
-            <span className="text-[10px] text-stone-500 font-medium">NT$199 基本配置</span>
+            <span className="text-[10px] text-stone-500 font-medium">低客製化 · 框體外觀</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-white border border-stone-200 shadow-sm space-y-1">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Custom 主題款</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">CUSTOM 文字客製</span>
             <div className="text-2xl font-black text-purple-600 font-mono">{metrics.customCount}</div>
-            <span className="text-[10px] text-purple-500 font-medium">NT$299 主題配置</span>
+            <span className="text-[10px] text-purple-500 font-medium">中客製化 · 外觀與文字</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-white border border-stone-200 shadow-sm space-y-1">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Premium 高客製</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">PREMIUM 自由客製</span>
             <div className="text-2xl font-black text-pink-600 font-mono">{metrics.premiumCount}</div>
-            <span className="text-[10px] text-pink-500 font-medium">NT$399+ 全解鎖</span>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white border border-stone-200 shadow-sm space-y-1">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">平均預估金額</span>
-            <div className="text-2xl font-black text-emerald-600 font-mono">NT${metrics.avgPrice}</div>
-            <span className="text-[10px] text-emerald-500 font-medium">客單價打樣評估</span>
+            <span className="text-[10px] text-pink-500 font-medium">高客製化 · 全部設計工具</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-white border border-stone-200 shadow-sm space-y-1">
@@ -293,9 +284,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToStore })
                 className="bg-transparent font-bold text-slate-800 outline-none cursor-pointer"
               >
                 <option value="ALL">全部方案</option>
-                <option value="BASIC">BASIC 基本款</option>
-                <option value="CUSTOM">CUSTOM 主題款</option>
-                <option value="PREMIUM">PREMIUM 高客製</option>
+                <option value="BASIC">BASIC 簡易客製</option>
+                <option value="CUSTOM">CUSTOM 文字客製</option>
+                <option value="PREMIUM">PREMIUM 自由客製</option>
               </select>
             </div>
 
@@ -352,7 +343,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToStore })
                   <th className="py-3 px-4">提交日期</th>
                   <th className="py-3 px-4">客戶名稱</th>
                   <th className="py-3 px-4">方案</th>
-                  <th className="py-3 px-4">預估金額</th>
                   <th className="py-3 px-4">狀態</th>
                   <th className="py-3 px-4 text-right">操作</th>
                 </tr>
@@ -360,7 +350,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToStore })
               <tbody className="divide-y divide-stone-100">
                 {filteredSubmissions.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400">
+                    <td colSpan={6} className="py-12 text-center text-slate-400">
                       {loading ? '正在載入後端資料……' : '目前尚無符合篩選條件的設計提交資料。'}
                     </td>
                   </tr>
@@ -386,9 +376,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToStore })
                       </td>
                       <td className="py-3.5 px-4">
                         {getPlanBadge(sub.plan)}
-                      </td>
-                      <td className="py-3.5 px-4 font-mono font-bold text-slate-900">
-                        NT${sub.final_price}
                       </td>
                       <td className="py-3.5 px-4">
                         {getStatusBadge(sub.status)}

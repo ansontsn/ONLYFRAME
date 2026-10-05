@@ -1,5 +1,6 @@
 import React from 'react';
 import { CustomizationTier } from '../types';
+import { TIER_OPTIONS, TIER_ORDER } from '../data/tiers';
 import { Check, Shield, Zap, Crown, ArrowRight } from 'lucide-react';
 
 interface TierSelectorProps {
@@ -16,72 +17,30 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
   const tiers = [
     {
       id: 'BASIC' as CustomizationTier,
-      badge: '入門經典',
+      badge: TIER_OPTIONS.BASIC.level,
       name: 'BASIC',
-      subName: '基本客製展示框',
-      price: '199',
-      priceNote: '暫定預估價',
-      description: '適合追求簡潔質感的收藏者，採固定標準矩形框體，專注搭配壓克力色彩。',
       icon: Shield,
       accentColor: 'border-stone-300 bg-white/85 hover:border-stone-400 shadow-sm',
       tagColor: 'bg-stone-100 text-stone-700 border-stone-200',
       btnClass: 'bg-stone-800 hover:bg-stone-900 text-white',
-      features: [
-        { text: '固定標準矩形雙層壓克力框', included: true },
-        { text: '選擇 10 種框體外觀透光顏色', included: true },
-        { text: '雙層 8mm 高透壓克力保護卡槽', included: true },
-        { text: '支援示範小卡裝框效果模擬預覽', included: true },
-        { text: '主題背景與特殊漸層 (12 款)', included: false },
-        { text: '原創貼飾自訂大小與旋轉擺放', included: false },
-        { text: '雷雕專屬文字與自由拖曳定位', included: false },
-        { text: '個人小卡圖片 1:1 上傳模擬置入', included: false }
-      ]
     },
     {
       id: 'CUSTOM' as CustomizationTier,
-      badge: '最受歡迎 · 推薦',
+      badge: TIER_OPTIONS.CUSTOM.level,
       name: 'CUSTOM',
-      subName: '主題客製展示框',
-      price: '299',
-      priceNote: '暫定預估價',
-      description: '為特定本命偶像或角色打造專屬氛圍，自由搭配背景、貼飾與應援文字。',
       icon: Zap,
       accentColor: 'border-purple-300/80 bg-white/90 hover:border-purple-400 shadow-md shadow-purple-500/5',
       tagColor: 'bg-purple-100 text-purple-700 border-purple-200',
       btnClass: 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-md',
-      features: [
-        { text: '固定標準矩形雙層壓克力框', included: true },
-        { text: '選擇 10 種框體外觀透光顏色', included: true },
-        { text: '雙層 8mm 高透壓克力保護卡槽', included: true },
-        { text: '支援示範小卡裝框效果模擬預覽', included: true },
-        { text: '解鎖 12 款主題背景 (銀河/星空/極光/CD雷射)', included: true },
-        { text: '解鎖兩套共 24 款原創貼飾 (自由旋轉與自訂大小)', included: true },
-        { text: '加入客製刻字與自由拖曳定位', included: true },
-        { text: '個人小卡圖片 1:1 上傳模擬置入', included: false }
-      ]
     },
     {
       id: 'PREMIUM' as CustomizationTier,
-      badge: '全功能解鎖',
+      badge: TIER_OPTIONS.PREMIUM.level,
       name: 'PREMIUM',
-      subName: '高度客製展示框',
-      price: '399',
-      priceNote: '起 · 自由升級',
-      description: '完全掌控設計細節，上傳個人專屬小卡模擬、自由排版位置與專屬字體，極致個人化。',
       icon: Crown,
       accentColor: 'border-pink-300/80 bg-white/90 hover:border-pink-400 shadow-lg shadow-pink-500/10',
       tagColor: 'bg-pink-100 text-pink-700 border-pink-200',
       btnClass: 'bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white shadow-md',
-      features: [
-        { text: '固定標準矩形雙層壓克力框', included: true },
-        { text: '選擇 10 種框體外觀透光顏色', included: true },
-        { text: '支援示範小卡裝框效果模擬預覽', included: true },
-        { text: '解鎖個人專屬小卡 1:1 上傳模擬置入', included: true },
-        { text: '自訂背景與專屬素材載入', included: true },
-        { text: '解鎖兩套原創貼飾 (自訂大小/旋轉/複製)', included: true },
-        { text: '全字體選擇 (含精品 Cinzel / Y2K 潮流體)', included: true },
-        { text: '畫布上自由滑鼠拖曳文字與貼飾位置', included: true }
-      ]
     }
   ];
 
@@ -98,7 +57,10 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
           選擇適合你的設計方式
         </h1>
         <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-          我們提供三種不同深度的客製化體驗。框體採固定標準矩形外型，您可以依需求選擇框色、背景與個人化裝飾：
+          從選外觀、加入文字，到完整自由設計，依照你想參與設計的程度選擇方案。
+        </p>
+        <p className="text-xs text-slate-500 leading-relaxed">
+          三種方案都能上傳自己的小卡圖片，放入展示框中進行即時預覽。小卡預覽是共同工具。
         </p>
       </div>
 
@@ -107,6 +69,14 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
         {tiers.map((tier) => {
           const Icon = tier.icon;
           const isSelected = currentTier === tier.id;
+          const plan = TIER_OPTIONS[tier.id];
+          const features = [
+            { text: '小卡預覽', included: true },
+            { text: '框體外觀', included: true },
+            { text: '自訂文字', included: plan.text },
+            { text: '主題背景', included: plan.background },
+            { text: '自由裝飾', included: plan.stickers },
+          ];
 
           return (
             <div
@@ -131,23 +101,20 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
                     {tier.name}
                   </h3>
                   <p className="text-xs text-slate-500 font-medium mt-0.5">
-                    {tier.subName}
+                    {plan.name}
                   </p>
                 </div>
 
-                {/* Price Display */}
-                <div className="pt-2 flex items-baseline gap-2 border-b border-stone-200/80 pb-4">
-                  <span className="text-xs text-slate-500">預估</span>
-                  <span className="text-4xl font-black text-slate-900 font-mono">
-                    NT${tier.price}
-                  </span>
-                  <span className="text-xs text-slate-500 font-medium">
-                    {tier.priceNote}
-                  </span>
+                <div className="pt-2 border-b border-stone-200/80 pb-4 space-y-2">
+                  <div className="flex gap-1" aria-label={plan.level}>
+                    {TIER_ORDER.map((level, index) => <span key={level} className={`h-1.5 w-8 rounded-full ${index <= TIER_ORDER.indexOf(tier.id) ? 'bg-pink-500' : 'bg-stone-200'}`} />)}
+                  </div>
+                  <p className="text-xl font-black text-slate-900">{plan.headline}</p>
+                  <p className="text-xs font-medium text-slate-500">{plan.summary}</p>
                 </div>
 
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  {tier.description}
+                <p className="min-h-[2.5rem] text-xs text-slate-600 leading-relaxed">
+                  {plan.description}
                 </p>
 
                 {/* Features Checklist */}
@@ -156,7 +123,7 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
                     可自訂項目清單：
                   </span>
                   <ul className="space-y-2 text-xs">
-                    {tier.features.map((feat, idx) => (
+                    {features.map((feat, idx) => (
                       <li key={idx} className="flex items-start gap-2.5">
                         {feat.included ? (
                           <div className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -167,7 +134,7 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
                             <span className="text-[10px]">✕</span>
                           </div>
                         )}
-                        <span className={feat.included ? 'text-slate-700 font-medium' : 'text-slate-400 line-through'}>
+                        <span className={feat.included ? 'text-slate-700 font-medium' : 'text-slate-400'}>
                           {feat.text}
                         </span>
                       </li>

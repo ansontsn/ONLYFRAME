@@ -14,8 +14,9 @@ CREATE TABLE IF NOT EXISTS public.design_submissions (
     customer_email TEXT NOT NULL,
     plan TEXT NOT NULL,
     plan_name TEXT NOT NULL,
-    base_price INTEGER NOT NULL,
-    final_price INTEGER NOT NULL,
+    -- Legacy columns retained for existing databases; new research records use 0.
+    base_price INTEGER NOT NULL DEFAULT 0,
+    final_price INTEGER NOT NULL DEFAULT 0,
     card_image_url TEXT DEFAULT '',
     frame_style TEXT DEFAULT '',
     frame_color TEXT DEFAULT '',

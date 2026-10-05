@@ -12,6 +12,7 @@ import {
   PRESET_PHOTOCARDS
 } from '../data/options';
 import { StickerArtwork } from './StickerArtwork';
+import { TIER_OPTIONS } from '../data/tiers';
 import { CARD_SIZE_PRESETS, FRAME_WIDTH_MM, FRAME_HEIGHT_MM, isCardSizeSupported } from '../utils/dimensions';
 import { 
   Palette, 
@@ -50,9 +51,11 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
 
   // Tier guards
   const isBasic = state.tier === 'BASIC';
+  const canUseBackgroundAndStickers = TIER_OPTIONS[state.tier].background;
 
   // Sticker actions
   const handleAddSticker = (stickerOptId: string) => {
+    if (!canUseBackgroundAndStickers) return;
     const opt = STICKER_OPTIONS.find(s => s.id === stickerOptId);
     if (!opt) return;
 
@@ -88,13 +91,14 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
   };
 
   const handleUpdateActiveSticker = (updates: Partial<PlacedSticker>) => {
-    if (!selectedStickerId) return;
+    if (!canUseBackgroundAndStickers || !selectedStickerId) return;
     onUpdateState({
       stickers: state.stickers.map((s) => (s.id === selectedStickerId ? { ...s, ...updates } : s))
     });
   };
 
   const handleDuplicateSticker = (id: string) => {
+    if (!canUseBackgroundAndStickers) return;
     const target = state.stickers.find(s => s.id === id);
     if (!target) return;
     const newId = `stk-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
@@ -111,6 +115,7 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
   };
 
   const handleRemoveSticker = (id: string) => {
+    if (!canUseBackgroundAndStickers) return;
     onUpdateState({ stickers: state.stickers.filter(s => s.id !== id) });
     if (selectedStickerId === id) {
       onSelectSticker?.(null);
@@ -173,7 +178,7 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
         >
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
           主題背景
-          {isBasic && <Lock className="w-3 h-3 text-slate-500 ml-0.5" />}
+          {!canUseBackgroundAndStickers && <Lock className="w-3 h-3 text-slate-500 ml-0.5" />}
         </button>
 
         <button
@@ -186,7 +191,7 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
         >
           <img src="/stickers/pearl/sparkle.png" alt="" className="w-4 h-4 object-contain" />
           裝飾貼飾
-          {isBasic && <Lock className="w-3 h-3 text-slate-500 ml-0.5" />}
+          {!canUseBackgroundAndStickers && <Lock className="w-3 h-3 text-slate-500 ml-0.5" />}
         </button>
 
         <button
@@ -337,14 +342,13 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
               </div>
             </div>
 
-            {/* Section B: Custom Photocard Upload (PREMIUM only) */}
+            {/* Shared photocard preview tool */}
             <div className="pt-2 border-t border-white/10">
               <span className="text-xs font-semibold text-slate-300 block mb-2">
-                上傳您自己的小卡圖片（PREMIUM 方案限定）：
+                上傳自己的小卡圖片（三種方案皆可預覽）：
               </span>
 
-              {state.tier === 'PREMIUM' ? (
-                <div className="space-y-3">
+              <div className="space-y-3">
                   {state.isCustomPhoto && state.photocardUrl ? (
                     <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.04] border border-pink-500/40">
                       <div className="flex items-center gap-3 min-w-0">
@@ -399,32 +403,12 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                       </div>
                     </label>
                   )}
-                </div>
-              ) : (
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-950/40 via-slate-900/60 to-pink-950/30 border border-purple-500/30 text-center space-y-2.5">
-                  <div className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center mx-auto border border-purple-500/30">
-                    <Lock className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-white">想上傳自己的專屬收藏小卡？</h4>
-                    <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                      個人卡片圖片 1:1 模擬上傳功能為 <strong>PREMIUM 高度客製方案</strong> 專屬開放。
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => onUpgradeTier('PREMIUM')}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white shadow-lg shadow-pink-500/25 transition-all"
-                  >
-                    <span>升級至 PREMIUM 方案解鎖上傳</span>
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
+              </div>
             </div>
 
             <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-[11px] text-slate-400 flex items-start gap-1.5">
               <span className="text-amber-400">⚠️</span>
-              <span>再次提醒：此模擬小卡僅為展示比例參考，實體出貨只包含您客製的壓克力展示框。</span>
+              <span>上傳圖片僅用於小卡裝框的即時預覽；網站為畢業專題研究 Prototype。</span>
             </div>
 
           </div>
@@ -440,18 +424,18 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
               </p>
             </div>
 
-            {isBasic ? (
+            {!canUseBackgroundAndStickers ? (
               <div className="p-4 rounded-xl bg-pink-500/10 border border-pink-500/30 text-center space-y-2">
                 <Lock className="w-6 h-6 text-pink-400 mx-auto" />
-                <h4 className="text-xs font-bold text-pink-300">BASIC 方案僅支援原色透亮</h4>
+                <h4 className="text-xs font-bold text-pink-300">PREMIUM 自由客製方案可使用主題背景</h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  主題背景與雷射銀河特效由 CUSTOM / PREMIUM 方案解鎖。
+                  PREMIUM 方案可使用背景與裝飾，包含所有既有純色、漸層與主題效果。
                 </p>
                 <button
-                  onClick={() => onUpgradeTier('CUSTOM')}
+                  onClick={() => onUpgradeTier('PREMIUM')}
                   className="mt-2 inline-flex items-center gap-1 px-4 py-1.5 rounded-lg text-xs font-semibold bg-pink-500 hover:bg-pink-600 text-white shadow-md transition-all"
                 >
-                  升級方案以選擇主題背景
+                  切換至 PREMIUM 自由客製
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -476,7 +460,7 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                         </span>
                       </div>
                       <span className="text-[10px] text-pink-400 mt-0.5 block">
-                        {bg.priceAddon > 0 ? `+NT$${bg.priceAddon}` : '包含在方案'}
+                        PREMIUM 主題背景
                       </span>
                     </button>
                   );
@@ -501,18 +485,18 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
               </p>
             </div>
 
-            {isBasic ? (
+            {!canUseBackgroundAndStickers ? (
               <div className="p-4 rounded-xl bg-pink-500/10 border border-pink-500/30 text-center space-y-2">
                 <Lock className="w-6 h-6 text-pink-400 mx-auto" />
-                <h4 className="text-xs font-bold text-pink-300">BASIC 方案不支援貼飾</h4>
+                <h4 className="text-xs font-bold text-pink-300">PREMIUM 自由客製方案可使用自由裝飾</h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  主題裝飾與立體貼飾功能由 CUSTOM / PREMIUM 方案提供。
+                  PREMIUM 方案可使用背景與裝飾，自由調整多個貼飾的位置、大小與旋轉。
                 </p>
                 <button
-                  onClick={() => onUpgradeTier('CUSTOM')}
+                  onClick={() => onUpgradeTier('PREMIUM')}
                   className="mt-2 inline-flex items-center gap-1 px-4 py-1.5 rounded-lg text-xs font-semibold bg-pink-500 hover:bg-pink-600 text-white shadow-md transition-all"
                 >
-                  升級至 CUSTOM 主題款
+                  切換至 PREMIUM 自由客製
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -759,15 +743,15 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
             {isBasic ? (
               <div className="p-4 rounded-xl bg-pink-500/10 border border-pink-500/30 text-center space-y-2">
                 <Lock className="w-6 h-6 text-pink-400 mx-auto" />
-                <h4 className="text-xs font-bold text-pink-300">BASIC 方案不支援雷雕文字</h4>
+                <h4 className="text-xs font-bold text-pink-300">CUSTOM 方案以上可使用文字</h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  專屬刻字印刷與多樣字體由 CUSTOM / PREMIUM 方案提供。
+                  CUSTOM 文字客製與 PREMIUM 自由客製可編輯內容、字體與文字位置。
                 </p>
                 <button
                   onClick={() => onUpgradeTier('CUSTOM')}
                   className="mt-2 inline-flex items-center gap-1 px-4 py-1.5 rounded-lg text-xs font-semibold bg-pink-500 hover:bg-pink-600 text-white shadow-md transition-all"
                 >
-                  升級至 CUSTOM 主題款 (+NT$100)
+                  切換至 CUSTOM 文字客製
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -940,7 +924,7 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                             {f.name}
                           </span>
                           <span className="text-[10px] text-pink-400 block mt-0.5">
-                            {f.isSpecial ? '+NT$20 (特殊設計字體)' : '基礎免費字體'}
+                            {f.isSpecial ? '特殊設計字體' : '基本字體'}
                           </span>
                         </button>
                       );

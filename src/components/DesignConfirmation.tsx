@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { CustomizerState, PriceBreakdown } from '../types';
+import { TIER_OPTIONS, getTierLabel } from '../data/tiers';
+import { CustomizerState } from '../types';
 import { FRAME_OPTIONS, FRAME_COLOR_OPTIONS, BACKGROUND_OPTIONS } from '../data/options';
 import { AcrylicFramePreview } from './AcrylicFramePreview';
 import { CheckCircle2, Download, RotateCcw, Layers, Share2, Info, Loader2 } from 'lucide-react';
@@ -7,7 +8,6 @@ import { toPng } from 'html-to-image';
 
 interface DesignConfirmationProps {
   state: CustomizerState;
-  priceBreakdown: PriceBreakdown;
   onModifyDesign: () => void;
   onChangeTier: () => void;
   onSubmitDesign?: () => void;
@@ -15,7 +15,6 @@ interface DesignConfirmationProps {
 
 export const DesignConfirmation: React.FC<DesignConfirmationProps> = ({
   state,
-  priceBreakdown,
   onModifyDesign,
   onChangeTier,
   onSubmitDesign
@@ -76,7 +75,7 @@ export const DesignConfirmation: React.FC<DesignConfirmationProps> = ({
           你的專屬收藏展示框已就緒
         </h1>
         <p className="text-sm text-slate-600 max-w-xl mx-auto">
-          依據您選擇的客製化程度與各項細節，我們已完成專屬壓克力展示框的即時打樣預覽與預估報價。
+          依據您選擇的客製化程度與各項細節，我們已完成專屬壓克力展示框的即時預覽與設計內容清單。
         </p>
       </div>
 
@@ -125,7 +124,7 @@ export const DesignConfirmation: React.FC<DesignConfirmationProps> = ({
           </div>
         </div>
 
-        {/* Right: Specifications & Pricing Summary */}
+        {/* Right: Specifications & Design Summary */}
         <div className="lg:col-span-6 space-y-6">
           <div className="p-6 rounded-3xl bg-[#12141c]/90 border border-white/10 shadow-2xl space-y-5">
             
@@ -135,7 +134,7 @@ export const DesignConfirmation: React.FC<DesignConfirmationProps> = ({
                   SELECTED TIER
                 </span>
                 <h3 className="text-xl font-black text-white mt-0.5">
-                  {state.tier === 'BASIC' ? 'BASIC 基本客製款' : state.tier === 'CUSTOM' ? 'CUSTOM 主題客製款' : 'PREMIUM 高度客製款'}
+                  {getTierLabel(state.tier)}
                 </h3>
               </div>
               <span className="text-xs font-mono px-3 py-1 rounded-full bg-pink-500/10 text-pink-300 border border-pink-500/30">
@@ -161,14 +160,14 @@ export const DesignConfirmation: React.FC<DesignConfirmationProps> = ({
               <div className="flex justify-between py-1 border-b border-white/5">
                 <span className="text-slate-400">背景視覺</span>
                 <span className="font-semibold text-slate-200">
-                  {state.tier === 'BASIC' ? '原色透亮' : bgOpt.name}
+                  {TIER_OPTIONS[state.tier].background ? bgOpt.name : '原色透亮'}
                 </span>
               </div>
 
               <div className="flex justify-between py-1 border-b border-white/5">
                 <span className="text-slate-400">裝飾配件</span>
                 <span className="font-semibold text-slate-200">
-                  {state.tier === 'BASIC' ? '無' : `${state.stickers.length} 枚`}
+                  {TIER_OPTIONS[state.tier].stickers ? `${state.stickers.length} 枚` : '無'}
                 </span>
               </div>
 
@@ -187,25 +186,16 @@ export const DesignConfirmation: React.FC<DesignConfirmationProps> = ({
               </div>
             </div>
 
-            {/* Price Box */}
-            <div className="p-4 rounded-2xl bg-gradient-to-tr from-pink-500/10 via-purple-500/10 to-transparent border border-pink-500/30 flex items-center justify-between">
-              <div>
-                <span className="text-xs text-slate-400 block">動態計算預估總額</span>
-                <span className="text-[11px] text-pink-400">
-                  含基礎方案與 {priceBreakdown.addons.length} 項客製加選
-                </span>
-              </div>
-              <div className="text-right">
-                <span className="text-3xl font-black text-white font-mono bg-gradient-to-r from-pink-400 to-purple-300 bg-clip-text text-transparent">
-                  NT${priceBreakdown.totalPrice}
-                </span>
-              </div>
+            <div className="p-4 rounded-2xl bg-gradient-to-tr from-pink-500/10 via-purple-500/10 to-transparent border border-pink-500/30 space-y-1">
+              <span className="text-xs text-slate-400 block">{TIER_OPTIONS[state.tier].level}</span>
+              <p className="text-sm font-bold text-pink-300">{TIER_OPTIONS[state.tier].summary}</p>
+              <p className="text-[11px] text-slate-400">三種方案皆可上傳小卡進行預覽。</p>
             </div>
 
             <div className="flex items-start gap-2 text-[11px] text-slate-400">
               <Info className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
               <p>
-                本網站為企管系畢業專題開發之互動式 Prototype。實體商品為客製壓克力展示框（出貨不含小卡）。所有規格與價格僅為概念樣品參考，不涉及真實金流與購買。
+                本網站為企管系畢業專題開發之互動式 Prototype。網站內容與產品規格僅供研究與展示使用，不進行實際販售。
               </p>
             </div>
 

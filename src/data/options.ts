@@ -19,7 +19,6 @@ export const FRAME_OPTIONS: FrameOption[] = [
     borderWidth: 'border-2',
     hasScrews: true,
     screwType: 'silver',
-    priceAddon: 0
   }
 ];
 
@@ -112,7 +111,6 @@ export const BACKGROUND_OPTIONS: BackgroundOption[] = [
     name: '原色純粹透亮',
     type: 'solid',
     cssClass: 'bg-transparent',
-    priceAddon: 0,
     isSpecial: false
   },
   {
@@ -120,7 +118,6 @@ export const BACKGROUND_OPTIONS: BackgroundOption[] = [
     name: '深空啞光黑',
     type: 'solid',
     cssClass: 'bg-gradient-to-b from-[#181a20] to-[#0c0d12]',
-    priceAddon: 0,
     isSpecial: false
   },
   {
@@ -128,7 +125,6 @@ export const BACKGROUND_OPTIONS: BackgroundOption[] = [
     name: '晨光微曦漸層',
     type: 'gradient',
     cssClass: 'bg-gradient-to-tr from-pink-500/20 via-purple-600/20 to-blue-500/20',
-    priceAddon: 0,
     isSpecial: false
   },
   {
@@ -136,7 +132,6 @@ export const BACKGROUND_OPTIONS: BackgroundOption[] = [
     name: '✦ Y2K 銀河雷射幻彩',
     type: 'galaxy',
     cssClass: 'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/60 via-purple-900/40 to-black',
-    priceAddon: 30,
     isSpecial: true
   },
   {
@@ -144,7 +139,6 @@ export const BACKGROUND_OPTIONS: BackgroundOption[] = [
     name: '⭐ 璀璨星塵星空',
     type: 'pattern',
     cssClass: 'bg-[radial-gradient(#ffffff33_1px,transparent_1px)] [background-size:16px_16px] bg-slate-950/80',
-    priceAddon: 30,
     isSpecial: true
   },
   {
@@ -152,7 +146,6 @@ export const BACKGROUND_OPTIONS: BackgroundOption[] = [
     name: '♡ 甜美愛心微浮雕',
     type: 'pattern',
     cssClass: 'bg-gradient-to-br from-pink-900/40 via-rose-950/30 to-black',
-    priceAddon: 30,
     isSpecial: true
   },
   {
@@ -160,7 +153,6 @@ export const BACKGROUND_OPTIONS: BackgroundOption[] = [
     name: '⚡ 賽博霓虹網格',
     type: 'pattern',
     cssClass: 'bg-[linear-gradient(to_right,#06b6d415_1px,transparent_1px),linear-gradient(to_bottom,#06b6d415_1px,transparent_1px)] bg-[size:18px_18px] bg-slate-950/90',
-    priceAddon: 30,
     isSpecial: true
   },
   {
@@ -168,7 +160,6 @@ export const BACKGROUND_OPTIONS: BackgroundOption[] = [
     name: '💥 二次元熱血速度線',
     type: 'pattern',
     cssClass: 'bg-[repeating-conic-gradient(from_0deg,#000000_0deg_15deg,#1e293b_15deg_30deg)] opacity-70 bg-black',
-    priceAddon: 30,
     isSpecial: true
   },
   {
@@ -176,7 +167,6 @@ export const BACKGROUND_OPTIONS: BackgroundOption[] = [
     name: '💿 CD 幻彩雷射眩光',
     type: 'gradient',
     cssClass: 'bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-rose-500/30 via-emerald-400/20 via-sky-500/30 to-purple-600/30 bg-slate-950',
-    priceAddon: 30,
     isSpecial: true
   },
   {
@@ -184,7 +174,6 @@ export const BACKGROUND_OPTIONS: BackgroundOption[] = [
     name: '🌌 北極夢幻極光',
     type: 'gradient',
     cssClass: 'bg-gradient-to-t from-slate-950 via-emerald-950/50 to-teal-800/40',
-    priceAddon: 30,
     isSpecial: true
   },
   {
@@ -192,7 +181,6 @@ export const BACKGROUND_OPTIONS: BackgroundOption[] = [
     name: '🥀 暗黑哥德薔薇夜',
     type: 'pattern',
     cssClass: 'bg-gradient-to-b from-red-950/50 via-black to-slate-950 border-rose-950/30',
-    priceAddon: 30,
     isSpecial: true
   },
   {
@@ -200,7 +188,6 @@ export const BACKGROUND_OPTIONS: BackgroundOption[] = [
     name: '🌆 蒸氣波落日幻境',
     type: 'gradient',
     cssClass: 'bg-gradient-to-b from-purple-900/50 via-pink-900/30 to-amber-900/40',
-    priceAddon: 30,
     isSpecial: true
   }
 ];
@@ -211,13 +198,13 @@ export const STICKER_OPTIONS: StickerOption[] = [
     ['heart', '星語愛心'], ['bow', '珍珠緞帶'], ['pearl-arc', '珍珠弧線'],
     ['blossom', '柔光花朵'], ['rosebud', '玫瑰花苞'], ['orbit', '星軌'],
     ['wing', '羽翼'], ['corner', '雕花邊角'], ['gem', '菱形寶石']
-  ] as const).map(([key, name]) => ({ id: `pearl-${key}`, imageSrc: `/stickers/pearl/${key}.png`, name, collection: 'pearl' as const, priceAddon: 0 })),
+  ] as const).map(([key, name]) => ({ id: `pearl-${key}`, imageSrc: `/stickers/pearl/${key}.png`, name, collection: 'pearl' as const })),
   ...([
     ['sparkle', '柔彩四芒星'], ['star-cluster', '柔彩星群'], ['crescent', '柔彩月光'],
     ['heart', '粉彩愛心'], ['bow', '柔粉蝴蝶結'], ['pearl-arc', '珍珠弧線'],
     ['blossom', '粉彩花朵'], ['rosebud', '粉彩玫瑰'], ['orbit', '柔彩星軌'],
     ['star-charm', '星星吊飾'], ['corner', '花紋邊角'], ['gem', '柔彩寶石']
-  ] as const).map(([key, name]) => ({ id: `pastel-${key}`, imageSrc: `/stickers/pastel/${key}.png`, name, collection: 'pastel' as const, priceAddon: 0 }))
+  ] as const).map(([key, name]) => ({ id: `pastel-${key}`, imageSrc: `/stickers/pastel/${key}.png`, name, collection: 'pastel' as const }))
 ];
 
 export const FONT_OPTIONS = [
