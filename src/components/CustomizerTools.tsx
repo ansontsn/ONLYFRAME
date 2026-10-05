@@ -13,6 +13,7 @@ import {
 } from '../data/options';
 import { StickerArtwork } from './StickerArtwork';
 import { TIER_OPTIONS } from '../data/tiers';
+import { MIN_TEXT_BOX_MM } from '../utils/textBox';
 import { CARD_SIZE_PRESETS, FRAME_WIDTH_MM, FRAME_HEIGHT_MM, isCardSizeSupported } from '../utils/dimensions';
 import { 
   Palette, 
@@ -763,6 +764,7 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                   </label>
                   <input
                     type="text"
+                    aria-label="文字內容"
                     value={state.text.content}
                     onChange={(e) =>
                       onUpdateState({
@@ -773,6 +775,34 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                     maxLength={30}
                     className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/15 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-pink-500"
                   />
+                </div>
+
+                <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3">
+                  <span className="text-xs font-bold text-white block">文字框尺寸</span>
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="text-[11px] text-slate-300">
+                      文字框寬度 (mm)
+                      <input type="number" aria-label="文字框寬度" min={MIN_TEXT_BOX_MM} max={FRAME_WIDTH_MM} step={0.5} value={Number(state.text.widthMm.toFixed(1))}
+                        onChange={e => { if (e.target.value) onUpdateState({ text: { ...state.text, widthMm: Math.max(MIN_TEXT_BOX_MM, Math.min(FRAME_WIDTH_MM, Number(e.target.value))) } }); }}
+                        className="mt-1 w-full px-2 py-1.5 rounded-lg bg-black/30 border border-white/10 text-xs text-white" />
+                    </label>
+                    <label className="text-[11px] text-slate-300">
+                      文字框高度 (mm)
+                      <input type="number" aria-label="文字框高度" min={MIN_TEXT_BOX_MM} max={FRAME_HEIGHT_MM} step={0.5} value={Number(state.text.heightMm.toFixed(1))}
+                        onChange={e => { if (e.target.value) onUpdateState({ text: { ...state.text, heightMm: Math.max(MIN_TEXT_BOX_MM, Math.min(FRAME_HEIGHT_MM, Number(e.target.value))) } }); }}
+                        className="mt-1 w-full px-2 py-1.5 rounded-lg bg-black/30 border border-white/10 text-xs text-white" />
+                    </label>
+                  </div>
+                  <label className="flex items-center justify-between gap-3 text-xs font-semibold text-slate-200">
+                    <span>自動換行</span>
+                    <input type="checkbox" role="switch" aria-label="自動換行" checked={state.text.autoWrap ?? false}
+                      onChange={e => onUpdateState({ text: { ...state.text, autoWrap: e.target.checked } })}
+                      className="h-4 w-4 accent-pink-500" />
+                  </label>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    {state.text.autoWrap ? '已開啟：文字依框寬自動換行。' : '單行模式：文字不因框寬不足而換行。'}
+                    選取中央文字框後，可拖曳左右或四角控制點調整尺寸；框尺寸與字體大小分開控制。
+                  </p>
                 </div>
 
                 {/* 2 Quick Position Presets */}
@@ -822,6 +852,7 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                       </div>
                       <input
                         type="range"
+                        aria-label="文字水平位置"
                         min={0}
                         max={FRAME_WIDTH_MM}
                         step={0.5}
@@ -842,6 +873,7 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                       </div>
                       <input
                         type="range"
+                        aria-label="文字垂直位置"
                         min={0}
                         max={FRAME_HEIGHT_MM}
                         step={0.5}
@@ -864,13 +896,14 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                       </div>
                       <input
                         type="range"
-                        min={3}
-                        max={7}
-                        step={0.5}
+                        aria-label="字體大小"
+                        min={2}
+                        max={12}
+                        step={0.25}
                         value={state.text.fontSizeMm}
                         onChange={(e) =>
                           onUpdateState({
-                            text: { ...state.text, fontSizeMm: Number(e.target.value), heightMm: Number(e.target.value) * 1.4 }
+                            text: { ...state.text, fontSizeMm: Number(e.target.value) }
                           })
                         }
                         className="w-full accent-pink-500"
@@ -879,11 +912,12 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
 
                     <div>
                       <div className="flex justify-between text-[11px] text-slate-300 mb-0.5">
-                        <span>旋轉傾斜角</span>
+                        <span>旋轉文字</span>
                         <span className="font-mono text-pink-300 font-bold">{state.text.rotation}°</span>
                       </div>
                       <input
                         type="range"
+                        aria-label="旋轉文字"
                         min={-180}
                         max={180}
                         value={state.text.rotation}
@@ -895,6 +929,15 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                         className="w-full accent-pink-500"
                       />
                     </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-[11px] text-slate-300 mb-0.5">
+                      <span>字距</span>
+                      <span className="font-mono text-pink-300 font-bold">{(state.text.letterSpacingMm ?? 0.45).toFixed(2)} mm</span>
+                    </div>
+                    <input type="range" aria-label="字距" min={0} max={3} step={0.05} value={state.text.letterSpacingMm ?? 0.45}
+                      onChange={e => onUpdateState({ text: { ...state.text, letterSpacingMm: Number(e.target.value) } })}
+                      className="w-full accent-pink-500" />
                   </div>
                 </div>
 

@@ -57,6 +57,8 @@ export interface TextConfig {
   content: string;
   font: string;
   fontSizeMm: number;
+  letterSpacingMm: number;
+  autoWrap: boolean;
   color: string;
   rotation: number;
   xMm: number;

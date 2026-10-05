@@ -165,7 +165,8 @@ export const submitDesignToBackend = async (params: {
       widthMm: state.text.widthMm, heightMm: state.text.heightMm, rotation: state.text.rotation,
       zIndex: state.text.zIndex, anchorTarget: state.text.anchorTarget || 'frame', anchorPosition: state.text.anchorPosition || null,
       offsetXmm: state.text.offsetXmm ?? 0, offsetYmm: state.text.offsetYmm ?? 0,
-      content: state.text.content, font: state.text.font, fontSizeMm: state.text.fontSizeMm, color: state.text.color
+      content: state.text.content, font: state.text.font, fontSizeMm: state.text.fontSizeMm,
+      letterSpacingMm: state.text.letterSpacingMm, autoWrap: state.text.autoWrap, color: state.text.color
     }] : [])
   ];
   const designData = {

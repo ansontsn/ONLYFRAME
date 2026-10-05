@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CustomizationTier, CustomizerState } from './types';
+import { CustomizationTier, CustomizerState, TextConfig } from './types';
 import { PRESET_PHOTOCARDS, INITIAL_TEXT_CONFIG } from './data/options';
 import { TIER_OPTIONS, getTierSwitchWarning, normalizeDesignForTier } from './data/tiers';
 import { AppView, Navbar } from './components/Navbar';
@@ -87,9 +87,22 @@ export const App: React.FC = () => {
 
   // Active selected sticker for rotation/size inspector
   const [selectedStickerId, setSelectedStickerId] = useState<string | null>(null);
+  const [isTextSelected, setIsTextSelected] = useState(false);
+  const handleSelectText = () => {
+    setIsTextSelected(true);
+    setSelectedStickerId(null);
+  };
+  const handleSelectSticker = (id: string | null) => {
+    setSelectedStickerId(id);
+    setIsTextSelected(false);
+  };
 
   // State update handlers
   const handleUpdateState = (updates: Partial<CustomizerState>) => {
+    if (updates.text) {
+      setIsTextSelected(Boolean(updates.text.content));
+      setSelectedStickerId(null);
+    }
     setCustomizerState((prev) => {
       const next = { ...prev, ...updates };
       if (updates.cardWidthMm !== undefined || updates.cardHeightMm !== undefined) {
@@ -121,11 +134,16 @@ export const App: React.FC = () => {
     }));
   };
 
+  const handleUpdateTextBox = (updates: Partial<TextConfig>) => {
+    setCustomizerState(prev => normalizeDesignForTier({ ...prev, text: { ...prev.text, ...updates } }));
+  };
+
   const handleSelectTier = (tier: CustomizationTier) => {
     const warning = getTierSwitchWarning(customizerState.tier, tier);
     if (warning && !window.confirm(warning)) return;
     setCustomizerState((prev) => normalizeDesignForTier({ ...prev, tier }));
     setSelectedStickerId(null);
+    setIsTextSelected(false);
     setCurrentView('customizer');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -134,6 +152,7 @@ export const App: React.FC = () => {
 
   const handleDownloadLiveMockup = async () => {
     setSelectedStickerId(null);
+    setIsTextSelected(false);
     setIsDownloadingLive(true);
     try {
       await new Promise(r => setTimeout(r, 120));
@@ -234,7 +253,7 @@ export const App: React.FC = () => {
                   onUpdateState={handleUpdateState}
                   onUpgradeTier={handleSelectTier}
                   selectedStickerId={selectedStickerId}
-                  onSelectSticker={setSelectedStickerId}
+                  onSelectSticker={handleSelectSticker}
                 />
               </div>
 
@@ -244,8 +263,12 @@ export const App: React.FC = () => {
                   state={customizerState}
                   onUpdateStickerPosition={handleUpdateStickerPosition}
                   selectedStickerId={selectedStickerId}
-                  onSelectSticker={setSelectedStickerId}
+                  onSelectSticker={handleSelectSticker}
                   onUpdateTextPosition={handleUpdateTextPosition}
+                  onUpdateTextBox={handleUpdateTextBox}
+                  isTextSelected={isTextSelected}
+                  onSelectText={handleSelectText}
+                  onDeselect={() => { setIsTextSelected(false); setSelectedStickerId(null); }}
                   interactive={true}
                 />
                 <div className="flex flex-wrap items-center justify-center gap-2.5 mt-3.5 w-full max-w-sm px-2">

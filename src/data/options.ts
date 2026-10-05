@@ -244,6 +244,8 @@ export const INITIAL_TEXT_CONFIG: TextConfig = {
   content: '',
   font: 'Outfit',
   fontSizeMm: 4.5,
+  letterSpacingMm: 0.45,
+  autoWrap: false,
   color: '#ffffff',
   rotation: 0,
   xMm: 42.5,

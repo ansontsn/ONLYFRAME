@@ -1,10 +1,11 @@
 import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { CustomizerState } from '../types';
+import { CustomizerState, TextConfig } from '../types';
 import { FRAME_OPTIONS, FRAME_COLOR_OPTIONS, BACKGROUND_OPTIONS } from '../data/options';
 import { CardAnchor, FRAME_WIDTH_MM, FRAME_HEIGHT_MM, MAGNET_CENTERS_MM, MAGNET_DIAMETER_MM, getCardAnchorMm, mmToPx, pxToMm } from '../utils/dimensions';
 import { Sparkles, Move } from 'lucide-react';
 import { StickerArtwork } from './StickerArtwork';
 import { normalizeDesignForTier } from '../data/tiers';
+import { EditableTextObject } from './EditableTextObject';
 
 interface AcrylicFramePreviewProps {
   state: CustomizerState;
@@ -12,18 +13,21 @@ interface AcrylicFramePreviewProps {
   selectedStickerId?: string | null;
   onSelectSticker?: (id: string) => void;
   onUpdateTextPosition?: (xMm: number, yMm: number, anchor?: CardAnchor) => void;
+  onUpdateTextBox?: (updates: Partial<TextConfig>) => void;
+  isTextSelected?: boolean;
+  onSelectText?: () => void;
+  onDeselect?: () => void;
   interactive?: boolean;
 }
 
 const ANCHORS: CardAnchor[] = ['top-left', 'top-center', 'top-right', 'center-left', 'center-right', 'bottom-left', 'bottom-center', 'bottom-right'];
 
-export const AcrylicFramePreview: React.FC<AcrylicFramePreviewProps> = ({ state: inputState, onUpdateStickerPosition, selectedStickerId, onSelectSticker, onUpdateTextPosition, interactive = true }) => {
+export const AcrylicFramePreview: React.FC<AcrylicFramePreviewProps> = ({ state: inputState, onUpdateStickerPosition, selectedStickerId, onSelectSticker, onUpdateTextPosition, onUpdateTextBox, isTextSelected = false, onSelectText, onDeselect, interactive = true }) => {
   const state = normalizeDesignForTier(inputState);
   const frameOpt = FRAME_OPTIONS.find(f => f.id === state.frameStyleId) || FRAME_OPTIONS[0];
   const colorOpt = FRAME_COLOR_OPTIONS.find(c => c.id === state.frameColorId) || FRAME_COLOR_OPTIONS[0];
   const bgOpt = BACKGROUND_OPTIONS.find(b => b.id === state.backgroundId) || BACKGROUND_OPTIONS[0];
   const frameRef = useRef<HTMLDivElement>(null);
-  const [isDraggingText, setIsDraggingText] = useState(false);
   const [draggingStickerId, setDraggingStickerId] = useState<string | null>(null);
   const [productMode, setProductMode] = useState(!interactive);
   const [snappedAnchor, setSnappedAnchor] = useState<CardAnchor | null>(null);
@@ -85,7 +89,7 @@ export const AcrylicFramePreview: React.FC<AcrylicFramePreviewProps> = ({ state:
 
   return <div className="relative flex flex-col items-center justify-center p-4 select-none w-full">
     <div className="absolute -inset-4 rounded-full blur-3xl opacity-35 transition-all duration-700 pointer-events-none" style={{ background: colorOpt.glowColor }} />
-    <div ref={frameRef} id="acrylic-display-frame" className={`relative max-w-full ${frameOpt.cornerStyle} transition-all duration-300 overflow-hidden acrylic-card shadow-acrylic ${colorOpt.outerBorder}`} style={{ width: 'min(320px, 100%, 50.26vh)', aspectRatio: `${FRAME_WIDTH_MM} / ${FRAME_HEIGHT_MM}`, boxShadow: `0 20px 45px -10px rgba(15, 23, 42, 0.16), 0 0 25px ${colorOpt.glowColor}25, inset 0 1px 2px rgba(255,255,255,0.85)` }}>
+    <div ref={frameRef} id="acrylic-display-frame" onPointerDown={() => { if (interactive && !productMode) onDeselect?.(); }} className={`relative max-w-full ${frameOpt.cornerStyle} transition-all duration-300 overflow-hidden acrylic-card shadow-acrylic ${colorOpt.outerBorder}`} style={{ width: 'min(320px, 100%, 50.26vh)', aspectRatio: `${FRAME_WIDTH_MM} / ${FRAME_HEIGHT_MM}`, boxShadow: `0 20px 45px -10px rgba(15, 23, 42, 0.16), 0 0 25px ${colorOpt.glowColor}25, inset 0 1px 2px rgba(255,255,255,0.85)` }}>
       <div className="absolute inset-0 pointer-events-none rounded-[inherit] border border-white/60 z-50" />
       <div className="absolute inset-0 pointer-events-none glass-reflection rotate-25 opacity-70 z-20" style={{ width: '200%', height: '200%', top: '-50%', left: '-50%' }} />
       <div className={`absolute inset-[4%] rounded-xl overflow-hidden transition-all duration-500 z-0 ${bgOpt.cssClass}`} style={state.customBgUrl ? { backgroundImage: `url(${state.customBgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}>
@@ -109,7 +113,17 @@ export const AcrylicFramePreview: React.FC<AcrylicFramePreviewProps> = ({ state:
         })}
       </div>}
 
-      {state.tier !== 'BASIC' && state.text.content && <div onPointerDown={e => { if (!interactive || productMode || !onUpdateTextPosition) return; setIsDraggingText(true); startDrag(e, (x, y, anchor) => onUpdateTextPosition(x, y, anchor), () => setIsDraggingText(false)); }} className={`absolute text-center -translate-x-1/2 -translate-y-1/2 select-none touch-none ${interactive && !productMode ? 'pointer-events-auto cursor-grab hover:ring-2 hover:ring-pink-400/80 rounded-lg px-2 py-0.5' : 'pointer-events-none'}`} style={{ left: mmToPx(state.text.xMm, scale), top: mmToPx(state.text.yMm, scale), width: mmToPx(state.text.widthMm, scale), fontSize: mmToPx(state.text.fontSizeMm, scale), color: state.text.color, fontFamily: state.text.font, zIndex: state.text.zIndex || 30, transform: `translate(-50%, -50%) rotate(${state.text.rotation}deg)`, textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 0 12px rgba(255, 255, 255, 0.4)', letterSpacing: '0.1em', overflowWrap: 'anywhere' }} title={interactive && !productMode ? '按住拖曳調整文字位置' : undefined}><span className="font-bold tracking-wider uppercase">{state.text.content}</span>{interactive && !productMode && <span className={`absolute -top-4 left-1/2 -translate-x-1/2 text-[9px] bg-pink-500 text-white font-bold px-1.5 py-0.5 rounded-full shadow whitespace-nowrap ${isDraggingText ? 'opacity-100' : 'opacity-0 hover:opacity-100'}`}>{isDraggingText ? '移動中...' : '可自由拖曳'}</span>}</div>}
+      {state.tier !== 'BASIC' && state.text.content && <EditableTextObject
+        text={state.text}
+        scale={scale}
+        editable={interactive && !productMode}
+        selected={isTextSelected}
+        cardWidthMm={state.cardWidthMm}
+        cardHeightMm={state.cardHeightMm}
+        onSelect={onSelectText}
+        onMove={(xMm, yMm, anchor) => { setSnappedAnchor(anchor || null); onUpdateTextPosition?.(xMm, yMm, anchor); }}
+        onResize={updates => { setSnappedAnchor(null); onUpdateTextBox?.(updates); }}
+      />}
 
       {!productMode && snappedAnchor && (() => { const anchor = getCardAnchorMm(snappedAnchor, state.cardWidthMm, state.cardHeightMm); return <span className="absolute z-50 w-3 h-3 rounded-full border-2 border-white bg-pink-400 shadow-[0_0_12px_rgba(244,114,182,0.95)] pointer-events-none" style={{ left: mmToPx(anchor.xMm, scale), top: mmToPx(anchor.yMm, scale), transform: 'translate(-50%, -50%)' }} />; })()}
       <div className="absolute bottom-[1.5%] inset-x-[5%] h-[1px] bg-white/30 rounded-full pointer-events-none z-50" />

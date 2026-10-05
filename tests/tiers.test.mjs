@@ -17,7 +17,7 @@ const design = {
   photocardUrl: 'data:image/png;base64,card', photocardName: 'my-card.png', isCustomPhoto: true,
   stickers: [{ id: 'one', xMm: 12, yMm: 40, widthMm: 9, heightMm: 9, rotation: 45 },
     { id: 'two', xMm: 72, yMm: 70, widthMm: 6, heightMm: 6, rotation: -30 }],
-  text: { content: 'MY COLLECTION', font: 'Cinzel', fontSizeMm: 5, xMm: 42.5, yMm: 98, rotation: 10 },
+  text: { content: 'MY COLLECTION', font: 'Cinzel', fontSizeMm: 5, letterSpacingMm: 0.45, autoWrap: false, xMm: 42.5, yMm: 98, rotation: 10 },
 };
 
 test('research tiers increase from appearance to text to background and decoration', () => {
@@ -74,5 +74,16 @@ test('updates from stale background and sticker controls are stripped at restric
     assert.deepEqual(staleUpdate.stickers, []);
     assert.equal(staleUpdate.backgroundId, 'bg-transparent');
     assert.equal(staleUpdate.customBgUrl, null);
+  }
+});
+
+test('legacy text defaults to single-line layout and both text tiers retain all layout settings', () => {
+  const { autoWrap, letterSpacingMm, ...legacyText } = design.text;
+  const legacy = normalizeDesignForTier({ ...design, text: legacyText });
+  assert.equal(legacy.text.autoWrap, false);
+  assert.equal(legacy.text.letterSpacingMm, 0.45);
+  for (const tier of ['CUSTOM', 'PREMIUM']) {
+    const text = { ...design.text, widthMm: 45, heightMm: 20, autoWrap: true, letterSpacingMm: 1.5 };
+    assert.deepEqual(normalizeDesignForTier({ ...design, tier, text }).text, text);
   }
 });

@@ -43,12 +43,17 @@ export const getTierLabel = (tier: CustomizationTier): string =>
 // cannot remain in the preview or research record after a downgrade.
 export const normalizeDesignForTier = (state: CustomizerState): CustomizerState => {
   const permissions = TIER_OPTIONS[state.tier];
+  const text = {
+    ...state.text,
+    letterSpacingMm: state.text.letterSpacingMm ?? 0.45,
+    autoWrap: state.text.autoWrap ?? false,
+  };
   return {
     ...state,
     backgroundId: permissions.background ? state.backgroundId : 'bg-transparent',
     customBgUrl: permissions.background ? state.customBgUrl : null,
     stickers: permissions.stickers ? state.stickers : [],
-    text: permissions.text ? state.text : { ...state.text, content: '' },
+    text: permissions.text ? text : { ...text, content: '' },
   };
 };
 
