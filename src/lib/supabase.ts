@@ -3,27 +3,22 @@ import { CustomizerState, DesignSubmission, SubmissionStatus } from '../types';
 import { normalizeDesignForTier, getTierLabel } from '../data/tiers';
 import { FRAME_OPTIONS, FRAME_COLOR_OPTIONS, BACKGROUND_OPTIONS, FONT_OPTIONS, STICKER_OPTIONS } from '../data/options';
 import { centeredCardPosition, FRAME_WIDTH_MM, FRAME_HEIGHT_MM, isCardSizeSupported } from '../utils/dimensions';
+import { resolveSupabaseConfig } from '../utils/supabaseConfig';
 
 // 取得環境變數
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const cloudConfig = resolveSupabaseConfig(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY, import.meta.env.VITE_SUPABASE_ANON_KEY);
+export const supabaseConfigurationError = cloudConfig.error;
+export const isDemoMode = () => cloudConfig.mode === 'demo';
+const assertCloudConfiguration = () => { if (cloudConfig.error) throw new Error(cloudConfig.error); };
 
 // 檢查是否已設定有效的 Supabase 連線資訊
 export const isSupabaseConfigured = (): boolean => {
-  return (
-    typeof supabaseUrl === 'string' &&
-    supabaseUrl.trim().length > 0 &&
-    supabaseUrl.startsWith('http') &&
-    !supabaseUrl.includes('your-project') &&
-    typeof supabaseAnonKey === 'string' &&
-    supabaseAnonKey.trim().length > 0 &&
-    !supabaseAnonKey.includes('your-anon-key')
-  );
+  return cloudConfig.mode === 'cloud';
 };
 
 // 建立 Supabase Client
 export const supabase = isSupabaseConfigured()
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(cloudConfig.url, cloudConfig.key)
   : null;
 
 // Mock 本機儲存 Key (用於無 Supabase key 時無縫體驗與測試)
@@ -45,7 +40,8 @@ const saveMockSubmissions = (data: DesignSubmission[]) => {
   try {
     localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(data));
   } catch (err) {
-    console.warn('Failed to save to localStorage:', err);
+    console.error('Failed to save to localStorage:', err);
+    throw new Error('本機儲存空間不足，設計尚未保存。請先下載預覽圖，或完成雲端設定後再試。');
   }
 };
 
@@ -65,6 +61,7 @@ export const uploadImageToStorage = async (
   bucket: 'card-images' | 'design-previews',
   fileNamePrefix: string
 ): Promise<string> => {
+  assertCloudConfiguration();
   if (!isSupabaseConfigured() || !supabase) {
     // 降級模式：若未設定 Supabase，轉成 Base64 或 Object URL 供展示
     return new Promise((resolve) => {
@@ -74,8 +71,10 @@ export const uploadImageToStorage = async (
     });
   }
 
-  const fileExt = blob.type.split('/')[1] || 'png';
-  const filePath = `${fileNamePrefix}-${Date.now()}-${Math.random().toString(36).substring(2, 6)}.${fileExt}`;
+  if (!['image/png', 'image/jpeg', 'image/webp'].includes(blob.type)) throw new Error('圖片格式不支援，請使用 PNG、JPG 或 WEBP。');
+  if (blob.size > 5 * 1024 * 1024) throw new Error('單張圖片不能超過 5 MB，請壓縮圖片後再試。');
+  const fileExt = blob.type.split('/')[1];
+  const filePath = `${fileNamePrefix}-${crypto.randomUUID()}.${fileExt}`;
 
   const { error } = await supabase.storage
     .from(bucket)
@@ -106,6 +105,7 @@ export const submitDesignToBackend = async (params: {
   state: CustomizerState;
   previewBlob?: Blob | null;
 }): Promise<DesignSubmission> => {
+  assertCloudConfiguration();
   const { customerName, customerEmail, previewBlob } = params;
   const state = normalizeDesignForTier(params.state);
 
@@ -115,23 +115,18 @@ export const submitDesignToBackend = async (params: {
 
   // 2. 處理小卡圖片上傳
   let cardImageUrl = state.photocardUrl;
+  if (isSupabaseConfigured() && cardImageUrl && !cardImageUrl.startsWith('data:')) {
+    cardImageUrl = new URL(cardImageUrl, window.location.origin).href;
+  }
   if (state.isCustomPhoto && state.photocardUrl.startsWith('data:')) {
-    try {
-      const cardBlob = await dataUrlToBlob(state.photocardUrl);
-      cardImageUrl = await uploadImageToStorage(cardBlob, 'card-images', 'card');
-    } catch (err) {
-      console.warn('Failed to upload card image to storage, fallback to data url:', err);
-    }
+    const cardBlob = await dataUrlToBlob(state.photocardUrl);
+    cardImageUrl = await uploadImageToStorage(cardBlob, 'card-images', 'card');
   }
 
   // 3. 處理完整立體展示框打樣圖上傳
   let previewImageUrl = '';
   if (previewBlob) {
-    try {
-      previewImageUrl = await uploadImageToStorage(previewBlob, 'design-previews', 'preview');
-    } catch (err) {
-      console.warn('Failed to upload preview image, skipping:', err);
-    }
+    previewImageUrl = await uploadImageToStorage(previewBlob, 'design-previews', 'preview');
   }
 
   // 4. 解析各選項名稱供後台直接易讀
@@ -147,8 +142,8 @@ export const submitDesignToBackend = async (params: {
   // 5. 產生人類易讀之訂單編號格式 (DES-YYYYMMDD-XXXX)
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
-  const randomSeq = Math.floor(1000 + Math.random() * 9000);
-  const submissionCode = `DES-${dateStr}-${randomSeq}`;
+  const submissionId = crypto.randomUUID();
+  const submissionCode = `DES-${dateStr}-${submissionId.replace(/-/g, '').slice(0, 12).toUpperCase()}`;
 
   // 6. 整理完整客製化 JSON (供未來還原設計)
   const cardPosition = centeredCardPosition(state.cardWidthMm, state.cardHeightMm);
@@ -188,7 +183,7 @@ export const submitDesignToBackend = async (params: {
   };
 
   const newSubmission: DesignSubmission = {
-    id: `sub-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    id: submissionId,
     submission_code: submissionCode,
     created_at: new Date().toISOString(),
     customer_name: customerName.trim(),
@@ -206,16 +201,20 @@ export const submitDesignToBackend = async (params: {
     custom_text: state.text.content || '(未設定文字)',
     font: fontOpt.name,
     design_data: designData,
-    preview_image_url: previewImageUrl || cardImageUrl,
+    preview_image_url: previewImageUrl,
     status: 'pending'
   };
 
   // 7. 寫入資料庫
   if (isSupabaseConfigured() && supabase) {
-    const { data, error } = await supabase
+    // Anonymous participants may INSERT but cannot SELECT other research rows.
+    // Keep the client-generated UUID/code; do not request a returned row.
+    const { error } = await supabase
       .from('design_submissions')
       .insert([
         {
+          id: newSubmission.id,
+          created_at: newSubmission.created_at,
           submission_code: newSubmission.submission_code,
           customer_name: newSubmission.customer_name,
           customer_email: newSubmission.customer_email,
@@ -234,20 +233,13 @@ export const submitDesignToBackend = async (params: {
           preview_image_url: newSubmission.preview_image_url,
           status: newSubmission.status
         }
-      ])
-      .select()
-      .single();
+      ]);
 
     if (error) {
       console.error('Supabase insert error:', error);
       throw new Error(`儲存至資料庫失敗: ${error.message}`);
     }
 
-    if (data) {
-      newSubmission.id = data.id;
-      if (data.submission_code) newSubmission.submission_code = data.submission_code;
-      if (data.created_at) newSubmission.created_at = data.created_at;
-    }
   } else {
     // 儲存於本機模擬資料庫
     const mocks = getMockSubmissions();
@@ -261,6 +253,7 @@ export const submitDesignToBackend = async (params: {
  * 取得所有送出之設計資料（供 Admin 管理者查看）
  */
 export const fetchAllSubmissions = async (): Promise<DesignSubmission[]> => {
+  assertCloudConfiguration();
   if (isSupabaseConfigured() && supabase) {
     const { data, error } = await supabase
       .from('design_submissions')
@@ -285,6 +278,7 @@ export const updateSubmissionStatus = async (
   id: string,
   status: SubmissionStatus
 ): Promise<boolean> => {
+  assertCloudConfiguration();
   if (isSupabaseConfigured() && supabase) {
     const { error } = await supabase
       .from('design_submissions')
@@ -303,4 +297,12 @@ export const updateSubmissionStatus = async (
   const updated = mocks.map(item => item.id === id ? { ...item, status } : item);
   saveMockSubmissions(updated);
   return true;
+};
+
+export const isUserResearchAdmin = async (userId: string): Promise<boolean> => {
+  assertCloudConfiguration();
+  if (!supabase) return isDemoMode();
+  const { data, error } = await supabase.from('research_admins').select('user_id').eq('user_id', userId).maybeSingle();
+  if (error) throw new Error('無法確認後台權限，請先執行雲端初始化 SQL 並設定管理者。');
+  return Boolean(data);
 };

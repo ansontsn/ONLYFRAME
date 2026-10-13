@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { DesignSubmission, SubmissionStatus, CustomizationTier } from '../../types';
-import { fetchAllSubmissions, supabase, isSupabaseConfigured } from '../../lib/supabase';
+import { fetchAllSubmissions, supabase, isSupabaseConfigured, isUserResearchAdmin } from '../../lib/supabase';
+import { Session } from '@supabase/supabase-js';
 import { AdminLogin } from './AdminLogin';
 import { SubmissionDetailModal } from './SubmissionDetailModal';
 import { 
@@ -21,6 +22,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToStore })
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   const [submissions, setSubmissions] = useState<DesignSubmission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [selectedSubmission, setSelectedSubmission] = useState<DesignSubmission | null>(null);
 
   // Filters
@@ -32,17 +34,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToStore })
   // Check Auth State on mount
   useEffect(() => {
     if (isSupabaseConfigured() && supabase) {
-      supabase.auth.getSession().then(({ data }) => {
-        if (data.session?.user?.email) {
-          setCurrentUserEmail(data.session.user.email);
+      let active = true;
+      let checkNumber = 0;
+      const checkSession = async (session: Session | null) => {
+        const currentCheck = ++checkNumber;
+        if (!session?.user.email) { setCurrentUserEmail(null); return; }
+        try {
+          const allowed = await isUserResearchAdmin(session.user.id);
+          if (active && currentCheck === checkNumber) setCurrentUserEmail(allowed ? session.user.email : null);
+        } catch {
+          if (active && currentCheck === checkNumber) setCurrentUserEmail(null);
         }
-      });
+      };
+      supabase.auth.getSession().then(({ data }) => { if (active) void checkSession(data.session); });
 
       const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
-        setCurrentUserEmail(session?.user?.email || null);
+        // Run database calls after the auth callback releases its session lock.
+        setTimeout(() => { if (active) void checkSession(session); }, 0);
       });
 
       return () => {
+        active = false;
         authListener.subscription.unsubscribe();
       };
     }
@@ -51,11 +63,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToStore })
   // Fetch submissions when authenticated
   const loadData = async () => {
     setLoading(true);
+    setLoadError('');
     try {
       const data = await fetchAllSubmissions();
       setSubmissions(data);
     } catch (err: any) {
       console.error('Failed to load submissions:', err);
+      setLoadError(err.message || '無法載入雲端資料，請稍後重新整理。');
     } finally {
       setLoading(false);
     }
@@ -221,6 +235,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToStore })
       </div>
 
       <div className="max-w-7xl mx-auto space-y-6">
+
+        {loadError && <p role="alert" className="p-3 rounded-xl border border-red-200 bg-red-50 text-sm text-red-700">{loadError}</p>}
 
         {/* Research metrics */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">

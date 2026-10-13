@@ -1,20 +1,15 @@
--- ==============================================================================
--- ONLYFRAME 畢業專題 - Supabase Database & Storage 完整架構設定
--- ==============================================================================
-
--- 1. 建立序號產生器（用於生成人類易讀之訂單編號，例如：DES-20260922-0001）
-CREATE SEQUENCE IF NOT EXISTS submission_code_seq;
-
--- 2. 建立主要資料表：design_submissions
+-- ONLYFRAME: run this complete file in the new project's SQL Editor.
+-- Rerunning preserves existing submissions and admin membership.
+BEGIN;
+CREATE SEQUENCE IF NOT EXISTS public.submission_code_seq;
 CREATE TABLE IF NOT EXISTS public.design_submissions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     submission_code TEXT NOT NULL UNIQUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     customer_name TEXT NOT NULL,
     customer_email TEXT NOT NULL,
-    plan TEXT NOT NULL,
+    plan TEXT NOT NULL CHECK (plan IN ('BASIC', 'CUSTOM', 'PREMIUM')),
     plan_name TEXT NOT NULL,
-    -- Legacy columns retained for existing databases; new research records use 0.
     base_price INTEGER NOT NULL DEFAULT 0,
     final_price INTEGER NOT NULL DEFAULT 0,
     card_image_url TEXT DEFAULT '',
@@ -28,87 +23,94 @@ CREATE TABLE IF NOT EXISTS public.design_submissions (
     preview_image_url TEXT DEFAULT '',
     status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'cancelled'))
 );
+CREATE INDEX IF NOT EXISTS design_submissions_created_at_idx ON public.design_submissions (created_at DESC);
+CREATE INDEX IF NOT EXISTS design_submissions_plan_idx ON public.design_submissions (plan);
 
--- 3. 自動生成格式化設計編號觸發函式 (DES-YYYYMMDD-XXXX)
 CREATE OR REPLACE FUNCTION public.generate_submission_code()
-RETURNS TRIGGER AS $$
-DECLARE
-    date_part TEXT;
-    seq_num TEXT;
+RETURNS TRIGGER LANGUAGE plpgsql SET search_path = '' AS $$
 BEGIN
     IF NEW.submission_code IS NULL OR NEW.submission_code = '' THEN
-        date_part := to_char(timezone('utc', now()), 'YYYYMMDD');
-        seq_num := lpad(nextval('submission_code_seq')::text, 4, '0');
-        NEW.submission_code := 'DES-' || date_part || '-' || seq_num;
+        NEW.submission_code := 'DES-' || to_char(timezone('UTC', now()), 'YYYYMMDD') || '-'
+            || lpad(nextval('public.submission_code_seq')::text, 6, '0');
     END IF;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
-
+$$;
 DROP TRIGGER IF EXISTS trigger_generate_submission_code ON public.design_submissions;
-CREATE TRIGGER trigger_generate_submission_code
-BEFORE INSERT ON public.design_submissions
-FOR EACH ROW
-EXECUTE FUNCTION public.generate_submission_code();
+CREATE TRIGGER trigger_generate_submission_code BEFORE INSERT ON public.design_submissions
+FOR EACH ROW EXECUTE FUNCTION public.generate_submission_code();
 
--- 4. 啟用 Row Level Security (RLS)
+-- Signing in alone does not grant access to participant data.
+CREATE TABLE IF NOT EXISTS public.research_admins (
+    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE public.research_admins ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.research_admins FROM anon, authenticated;
+GRANT SELECT ON public.research_admins TO authenticated;
+DROP POLICY IF EXISTS "Admins can read own membership" ON public.research_admins;
+CREATE POLICY "Admins can read own membership" ON public.research_admins
+FOR SELECT TO authenticated USING (user_id = (SELECT auth.uid()));
+
+CREATE OR REPLACE FUNCTION public.is_research_admin()
+RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
+    SELECT EXISTS (SELECT 1 FROM public.research_admins WHERE user_id = (SELECT auth.uid()));
+$$;
+REVOKE ALL ON FUNCTION public.is_research_admin() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.is_research_admin() TO authenticated;
+
 ALTER TABLE public.design_submissions ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.design_submissions FROM anon, authenticated;
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT INSERT ON public.design_submissions TO anon, authenticated;
+GRANT SELECT, UPDATE (status) ON public.design_submissions TO authenticated;
+GRANT USAGE ON SEQUENCE public.submission_code_seq TO anon, authenticated;
 
--- 一般消費者（anon）只能新增送出設計，無法直接讀取他人資料
 DROP POLICY IF EXISTS "Public can submit designs" ON public.design_submissions;
-CREATE POLICY "Public can submit designs"
-    ON public.design_submissions
-    FOR INSERT
-    TO anon, authenticated
-    WITH CHECK (true);
-
--- 管理者（已登入 authenticated 用戶）可以讀取所有設計
+CREATE POLICY "Public can submit designs" ON public.design_submissions FOR INSERT TO anon, authenticated
+WITH CHECK (
+    status = 'pending' AND base_price = 0 AND final_price = 0
+    AND plan IN ('BASIC', 'CUSTOM', 'PREMIUM') AND plan = design_data->>'plan'
+    AND length(btrim(customer_name)) BETWEEN 1 AND 100
+    AND length(btrim(customer_email)) BETWEEN 3 AND 254
+    AND jsonb_typeof(design_data) = 'object'
+    AND (design_data->'card'->>'widthMm')::numeric BETWEEN 50 AND 63
+    AND (design_data->'card'->>'heightMm')::numeric BETWEEN 70 AND 90
+    AND (plan <> 'BASIC' OR coalesce(design_data->'text'->>'content', '') = '')
+    AND (plan = 'PREMIUM' OR (
+        design_data->>'backgroundId' = 'bg-transparent'
+        AND coalesce(design_data->'customBgUrl', 'null'::jsonb) = 'null'::jsonb
+        AND coalesce(design_data->'stickers', '[]'::jsonb) = '[]'::jsonb
+    ))
+);
 DROP POLICY IF EXISTS "Admins can view all submissions" ON public.design_submissions;
-CREATE POLICY "Admins can view all submissions"
-    ON public.design_submissions
-    FOR SELECT
-    TO authenticated
-    USING (true);
-
--- 管理者可以更新訂單狀態 (待處理、製作中、已完成、已取消)
+CREATE POLICY "Admins can view all submissions" ON public.design_submissions
+FOR SELECT TO authenticated USING ((SELECT public.is_research_admin()));
 DROP POLICY IF EXISTS "Admins can update submission status" ON public.design_submissions;
-CREATE POLICY "Admins can update submission status"
-    ON public.design_submissions
-    FOR UPDATE
-    TO authenticated
-    USING (true)
-    WITH CHECK (true);
+CREATE POLICY "Admins can update submission status" ON public.design_submissions
+FOR UPDATE TO authenticated USING ((SELECT public.is_research_admin()))
+WITH CHECK ((SELECT public.is_research_admin()));
 
--- 5. 建立 Storage Buckets (card-images 與 design-previews)
-INSERT INTO storage.buckets (id, name, public)
-VALUES 
-    ('card-images', 'card-images', true),
-    ('design-previews', 'design-previews', true)
-ON CONFLICT (id) DO UPDATE SET public = true;
+-- Preserve the prototype's public image-link behavior. Database rows are private.
+-- Only PNG/JPEG/WEBP images, at most 5 MB per file, are accepted by these buckets.
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES
+    ('card-images', 'card-images', true, 5242880, ARRAY['image/png', 'image/jpeg', 'image/webp']),
+    ('design-previews', 'design-previews', true, 5242880, ARRAY['image/png', 'image/jpeg', 'image/webp'])
+ON CONFLICT (id) DO UPDATE SET public = EXCLUDED.public,
+    file_size_limit = EXCLUDED.file_size_limit, allowed_mime_types = EXCLUDED.allowed_mime_types;
 
--- 6. Storage Row Level Security 政策
--- 允許一般使用者上傳小卡與打樣預覽圖片
 DROP POLICY IF EXISTS "Allow public upload to card-images" ON storage.objects;
-CREATE POLICY "Allow public upload to card-images"
-    ON storage.objects FOR INSERT
-    TO anon, authenticated
-    WITH CHECK (bucket_id = 'card-images');
-
+CREATE POLICY "Allow public upload to card-images" ON storage.objects FOR INSERT TO anon, authenticated
+WITH CHECK (bucket_id = 'card-images');
 DROP POLICY IF EXISTS "Allow public upload to design-previews" ON storage.objects;
-CREATE POLICY "Allow public upload to design-previews"
-    ON storage.objects FOR INSERT
-    TO anon, authenticated
-    WITH CHECK (bucket_id = 'design-previews');
+CREATE POLICY "Allow public upload to design-previews" ON storage.objects FOR INSERT TO anon, authenticated
+WITH CHECK (bucket_id = 'design-previews');
 
--- 允許公開讀取圖片檔案
+-- Public URLs serve the images; anonymous object listing is not granted.
 DROP POLICY IF EXISTS "Allow public read from card-images" ON storage.objects;
-CREATE POLICY "Allow public read from card-images"
-    ON storage.objects FOR SELECT
-    TO public
-    USING (bucket_id = 'card-images');
-
 DROP POLICY IF EXISTS "Allow public read from design-previews" ON storage.objects;
-CREATE POLICY "Allow public read from design-previews"
-    ON storage.objects FOR SELECT
-    TO public
-    USING (bucket_id = 'design-previews');
+DROP POLICY IF EXISTS "Research admins can read image objects" ON storage.objects;
+CREATE POLICY "Research admins can read image objects" ON storage.objects FOR SELECT TO authenticated
+USING (bucket_id IN ('card-images', 'design-previews') AND (SELECT public.is_research_admin()));
+COMMIT;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import { supabase, isSupabaseConfigured, isDemoMode, supabaseConfigurationError, isUserResearchAdmin } from '../../lib/supabase';
 import { Mail, KeyRound, Loader2, ArrowLeft, ShieldAlert } from 'lucide-react';
 
 interface AdminLoginProps {
@@ -20,6 +20,8 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
     e.preventDefault();
     setErrorMsg('');
 
+    if (supabaseConfigurationError) { setErrorMsg(supabaseConfigurationError); return; }
+
     if (!email.trim() || !password) {
       setErrorMsg('請輸入管理者 Email 與密碼');
       return;
@@ -37,7 +39,12 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
         if (error) {
           setErrorMsg(`登入失敗：${error.message}`);
         } else if (data.user) {
-          onLoginSuccess(data.user.email || email);
+          if (await isUserResearchAdmin(data.user.id)) {
+            onLoginSuccess(data.user.email || email);
+          } else {
+            await supabase.auth.signOut();
+            setErrorMsg('此帳號尚未加入 ONLYFRAME 管理者名單，請先設定後台權限。');
+          }
         }
       } catch (err: any) {
         setErrorMsg(`連線異常：${err.message || '請確認 Supabase 設定'}`);
@@ -86,7 +93,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
         </div>
 
         {/* Supabase Status Banner */}
-        {!isSupabaseConfigured() && (
+        {isDemoMode() && (
           <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-800 space-y-1">
             <div className="flex items-center gap-1.5 font-bold">
               <ShieldAlert className="w-4 h-4 text-amber-600 flex-shrink-0" />
@@ -97,6 +104,8 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
             </p>
           </div>
         )}
+
+        {supabaseConfigurationError && <p role="alert" className="p-3 rounded-xl bg-red-50 text-xs text-red-700">{supabaseConfigurationError}</p>}
 
         {errorMsg && (
           <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600 font-medium">
@@ -151,7 +160,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
         </form>
 
         {/* Quick Demo Bypass for local assessment */}
-        {!isSupabaseConfigured() && (
+        {isDemoMode() && (
           <div className="pt-2 border-t border-stone-100 text-center">
             <button
               onClick={handleDemoBypass}

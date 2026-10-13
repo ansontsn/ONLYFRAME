@@ -55,7 +55,7 @@ export const SubmissionSuccessView: React.FC<SubmissionSuccessViewProps> = ({
               OFFICIAL SUBMISSION CODE
             </span>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-2xl sm:text-3xl font-black text-slate-900 font-mono tracking-tight">
+              <span className="min-w-0 break-all text-lg sm:text-3xl font-black text-slate-900 font-mono tracking-tight">
                 {submission.submission_code}
               </span>
               <button

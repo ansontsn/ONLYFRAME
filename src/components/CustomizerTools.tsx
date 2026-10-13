@@ -382,6 +382,11 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
+                          if (file.size > 5 * 1024 * 1024) {
+                            alert('單張小卡圖片最多 5 MB，請壓縮後再上傳。');
+                            e.target.value = '';
+                            return;
+                          }
                           const reader = new FileReader();
                           reader.onload = (ev) => {
                             if (ev.target?.result) {
@@ -400,7 +405,7 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                       </div>
                       <div>
                         <span className="text-xs font-semibold text-slate-200 block">點擊上傳個人小卡圖片</span>
-                        <span className="text-[10px] text-slate-500 block mt-0.5">支援 PNG, JPG, WEBP（1:1 裝框模擬）</span>
+                        <span className="text-[10px] text-slate-500 block mt-0.5">支援 PNG, JPG, WEBP；每張最多 5 MB（1:1 裝框模擬）</span>
                       </div>
                     </label>
                   )}
