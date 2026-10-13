@@ -1,6 +1,6 @@
 # ONLYFRAME 免費雲端設定
 
-本資料夾提供初始化 SQL、網站後台管理者設定，以及串接步驟。SQL 尚未在你的正式雲端專案執行；程式建置成功不代表網站已連上雲端。
+本資料夾提供初始化 SQL、網站後台管理者設定，以及串接步驟。請依序完成正式專案與代管設定；程式建置成功不代表已發布網站已連上雲端。
 
 ## 1. 建立專案
 
@@ -52,6 +52,14 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_你的公開金鑰
 
 雲端代管網站還必須在代管平台的 **Environment variables** 填入上述同名變數，再重新部署。Vite 在建置時讀取它們；只設定電腦上的 `.env.local` 不會改變已發布的網站。
 
+使用 Vercel 時：
+
+1. 在 Dashboard 選擇 ONLYFRAME 的網站專案，進入 **Settings → Environment Variables**。
+2. 新增 `VITE_SUPABASE_URL` 與 `VITE_SUPABASE_PUBLISHABLE_KEY`，各填入正式專案的公開值，選擇 **Production** 與 **Preview**，按 **Save**。
+3. 到 **Deployments**，選擇最新 `main` 的部署，從 **⋯ → Redeploy** 重新建置並等待 **Ready**。已存在的部署不會自動套用剛修改的環境變數。
+4. 重新開啟正式網站 `/admin`，應看到帳號登入且不再有「展示模式直接進入」。使用先前建立的網站帳號登入，確認能看到標示「非研究樣本」的連線測試資料。
+5. 正式蒐集前清除或排除所有測試紀錄；測試資料不可視為受試者樣本。
+
 `pnpm run build` 會先檢查連線設定。設定不完整或使用高權限金鑰時會停止建置，避免將它包進網站。完全未設定時仍保留既有本機展示模式。
 
 ## 5. 正式連線驗證
@@ -73,3 +81,4 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_你的公開金鑰
 - [INSERT 與可選的 SELECT 回傳](https://supabase.com/docs/reference/javascript/insert)
 - [RLS 存取權限](https://supabase.com/docs/guides/database/postgres/row-level-security)
 - [圖片桶與公開／私有存取](https://supabase.com/docs/guides/storage/buckets/fundamentals)
+- [Vercel 環境變數與重新部署](https://vercel.com/docs/environment-variables/managing-environment-variables)
