@@ -4,14 +4,8 @@ import { submitDesignToBackend, dataUrlToBlob } from '../lib/supabase';
 import { toPng } from 'html-to-image';
 import { getTierLabel, TIER_OPTIONS } from '../data/tiers';
 import { isCardSizeSupported } from '../utils/dimensions';
-import { 
-  X, 
-  Loader2, 
-  AlertCircle, 
-  ShieldCheck, 
-  User, 
-  Mail 
-} from 'lucide-react';
+import { ArrowRight, ShieldCheck, WarningCircle, X } from '@phosphor-icons/react';
+import { arrowNudge, btnPrimary, btnSecondary, focusRing } from './ui';
 
 interface SubmitDesignModalProps {
   isOpen: boolean;
@@ -19,6 +13,11 @@ interface SubmitDesignModalProps {
   state: CustomizerState;
   onSuccess: (submission: DesignSubmission) => void;
 }
+
+const fieldClass = (invalid: boolean) =>
+  `mt-2 w-full rounded-xl border bg-white px-3 py-2 text-base text-ink outline-none transition-colors duration-300 ease-out placeholder:text-black/30 disabled:opacity-50 ${
+    invalid ? 'border-red-400 focus:border-red-600 focus:ring-1 focus:ring-red-600' : 'border-black/10 focus:border-ink focus:ring-1 focus:ring-ink'
+  }`;
 
 export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
   isOpen,
@@ -31,6 +30,7 @@ export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingStep, setLoadingStep] = useState('正在儲存你的專屬設計……');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -69,6 +69,7 @@ export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
     if (!validate()) return;
 
     setIsSubmitting(true);
@@ -77,7 +78,7 @@ export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
     try {
       // 1. 嘗試產生立體卡框 Preview Blob (藉由 html-to-image)
       let previewBlob: Blob | null = null;
-      setLoadingStep('正在產生 3D 高透壓克力展示框打樣圖……');
+      setLoadingStep('正在產生展示框預覽圖……');
       const node = document.getElementById('acrylic-display-frame');
       if (node) {
         try {
@@ -93,7 +94,7 @@ export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
       }
 
       // 2. 送出至後端 (圖片上傳至 Storage、寫入 Database)
-      setLoadingStep('正在上傳設計參數與圖片至雲端儲存空間……');
+      setLoadingStep('正在上傳設計資料……');
       const submission = await submitDesignToBackend({
         customerName,
         customerEmail,
@@ -106,47 +107,47 @@ export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
       onClose();
     } catch (err: any) {
       console.error('Submit design error:', err);
-      alert(`送出失敗：${err.message || '請確認網路連線或稍後再試！'}`);
+      setSubmitError(`送出失敗：${err.message || '請確認網路連線後再試一次。'}`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const nameInvalid = validationErrors.some((e) => e.includes('姓名'));
+  const emailInvalid = validationErrors.some((e) => e.includes('信箱'));
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl bg-[#FAF8F5] border border-stone-200 shadow-2xl p-6 sm:p-7 space-y-5 text-slate-800">
-        
-        {/* Close Button */}
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="submit-design-title"
+        className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-6 shadow-[0_40px_120px_-40px_rgba(0,0,0,0.5)] sm:p-8"
+      >
         <button
           onClick={onClose}
           disabled={isSubmitting}
-          className="absolute top-5 right-5 p-2 rounded-full bg-stone-200/60 hover:bg-stone-200 text-slate-500 hover:text-slate-900 transition-colors disabled:opacity-30"
+          aria-label="關閉"
+          className={`absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full text-black/50 transition-colors duration-300 ease-out hover:bg-black/5 hover:text-ink disabled:opacity-30 ${focusRing}`}
         >
-          <X className="w-5 h-5" />
+          <X weight="bold" className="h-5 w-5" />
         </button>
 
-        {/* Header */}
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/20 text-xs font-bold text-pink-600">
-            <img src="/logo.png" alt="ONLYFRAME" className="w-3.5 h-3.5 rounded-sm object-contain" />
-            <span>送出客製化設計 · SUBMIT DESIGN</span>
-          </div>
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900">
-            確認送出您的專屬卡框
-          </h2>
-          <p className="text-xs text-slate-500 leading-relaxed">
-            系統將為您產生專屬設計編號，並將完整設計參數保存至後端資料庫以供後續打樣評估。
-          </p>
-        </div>
+        <p className="text-xs font-semibold uppercase tracking-widest text-brand">送出設計</p>
+        <h2 id="submit-design-title" className="mt-2 pr-12 text-2xl font-bold tracking-tight text-ink">
+          確認送出你的專屬卡框
+        </h2>
+        <p className="mt-2 text-sm text-black/55">
+          系統會為你產生專屬設計編號，並把完整設計參數保存到資料庫，供後續打樣評估。
+        </p>
 
-        {/* Validation Errors Notice */}
         {validationErrors.length > 0 && (
-          <div className="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-xs text-red-700 space-y-1">
-            <div className="font-bold flex items-center gap-1.5 text-red-800">
-              <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-              <span>請完成以下項目後再送出：</span>
-            </div>
-            <ul className="list-disc list-inside space-y-0.5 pl-1 text-[11px] text-red-600">
+          <div role="alert" className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+            <p className="flex items-center gap-2 font-semibold">
+              <WarningCircle weight="bold" className="h-4 w-4 shrink-0" />
+              請完成以下項目後再送出
+            </p>
+            <ul className="mt-2 list-inside list-disc space-y-1 text-red-700">
               {validationErrors.map((err, idx) => (
                 <li key={idx}>{err}</li>
               ))}
@@ -154,93 +155,76 @@ export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
           </div>
         )}
 
-        {/* Form Inputs */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          
-          {/* Design Summary Card */}
-          <div className="p-3.5 rounded-2xl bg-white/80 border border-stone-200/80 shadow-sm flex items-center justify-between text-xs">
+        <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-4">
+
+          <div className="flex items-center justify-between gap-3 rounded-2xl bg-paper p-4 text-sm">
             <div>
-              <span className="text-[10px] text-slate-400 font-mono block">方案配置</span>
-              <span className="font-bold text-slate-800">{getTierLabel(state.tier)}</span>
+              <span className="block text-xs text-black/40">方案配置</span>
+              <span className="font-semibold text-ink">{getTierLabel(state.tier)}</span>
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-slate-400 font-mono block">客製程度</span>
-              <span className="font-black text-pink-600 text-sm font-mono">{TIER_OPTIONS[state.tier].level}</span>
+              <span className="block text-xs text-black/40">客製程度</span>
+              <span className="font-semibold text-ink">{TIER_OPTIONS[state.tier].level}</span>
             </div>
           </div>
 
-          {/* Customer Name */}
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-pink-500" />
-              <span>聯絡姓名 (Name) <span className="text-pink-500">*</span></span>
-            </label>
+          <label className="block text-sm font-medium text-ink">
+            聯絡姓名 <span className="text-brand" aria-hidden="true">*</span>
             <input
               type="text"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
-              placeholder="例如：王小明"
+              placeholder="例如：林品妤"
               disabled={isSubmitting}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-stone-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 text-xs text-slate-800 outline-none transition-all"
+              required
+              aria-invalid={nameInvalid}
+              autoComplete="name"
+              className={fieldClass(nameInvalid)}
             />
-          </div>
+          </label>
 
-          {/* Customer Email */}
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5 text-purple-500" />
-              <span>電子信箱 (Email) <span className="text-pink-500">*</span></span>
-            </label>
+          <label className="block text-sm font-medium text-ink">
+            電子信箱 <span className="text-brand" aria-hidden="true">*</span>
             <input
               type="email"
               value={customerEmail}
               onChange={(e) => setCustomerEmail(e.target.value)}
-              placeholder="例如：student@university.edu.tw"
+              placeholder="例如：pinyu.lin@mail.ntust.edu.tw"
               disabled={isSubmitting}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-stone-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 text-xs text-slate-800 outline-none transition-all"
+              required
+              aria-invalid={emailInvalid}
+              autoComplete="email"
+              className={fieldClass(emailInvalid)}
             />
-          </div>
+          </label>
 
-          {/* Research Purpose Note */}
-          <div className="flex items-start gap-2 text-[11px] text-slate-500 leading-normal p-2.5 rounded-xl bg-stone-100/70 border border-stone-200">
-            <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-            <span>
-              本系統為企管系畢業專題研究 MVP，送出之設計資料僅作為打樣分析，不會進行任何信用卡扣款或商業用途。
-            </span>
-          </div>
+          <p className="flex items-start gap-2 rounded-xl bg-paper p-3 text-xs text-black/55">
+            <ShieldCheck weight="duotone" className="h-4 w-4 shrink-0 text-ink" />
+            本系統為企管系畢業專題研究原型，送出的設計資料僅作為打樣分析，不會進行任何扣款或商業用途。
+          </p>
 
-          {/* Submit Actions */}
-          <div className="pt-2 flex items-center gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="flex-1 py-3 px-4 rounded-xl text-xs font-bold bg-stone-200/70 hover:bg-stone-200 text-slate-700 transition-colors"
-            >
+          {submitError && <p role="alert" className="text-sm font-medium text-red-700">{submitError}</p>}
+
+          <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row">
+            <button type="button" onClick={onClose} disabled={isSubmitting} className={`sm:flex-1 ${btnSecondary}`}>
               稍後再送
             </button>
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-2 py-3 px-6 rounded-xl text-xs font-bold bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white shadow-lg shadow-pink-500/25 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
-            >
+            <button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className={`sm:flex-[2] ${btnPrimary} disabled:opacity-100`}>
               {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>{loadingStep}</span>
-                </>
+                <span className="inline-flex items-center gap-2 text-sm">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-white" aria-hidden="true" />
+                  {loadingStep}
+                </span>
               ) : (
                 <>
-                  <img src="/logo.png" alt="ONLYFRAME" className="w-4 h-4 rounded-sm object-contain" />
-                  <span>確認送出設計 ➔</span>
+                  確認送出設計
+                  <ArrowRight weight="bold" className={arrowNudge} />
                 </>
               )}
             </button>
           </div>
 
         </form>
-
       </div>
     </div>
   );

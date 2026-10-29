@@ -129,14 +129,16 @@ export const AcrylicFramePreview: React.FC<AcrylicFramePreviewProps> = ({ state:
       <div className="absolute bottom-[1.5%] inset-x-[5%] h-[1px] bg-white/30 rounded-full pointer-events-none z-50" />
     </div>
 
-    {interactive && <div className="relative z-10 mt-3 inline-flex rounded-xl bg-white/80 border border-stone-200 p-1 shadow-sm">
-      <button onClick={() => setProductMode(false)} className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold ${!productMode ? 'bg-slate-800 text-white' : 'text-slate-500'}`}>編輯模式</button>
-      <button onClick={() => { setProductMode(true); setSnappedAnchor(null); }} className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold ${productMode ? 'bg-slate-800 text-white' : 'text-slate-500'}`}>成品預覽</button>
+    {interactive && <div className="relative z-10 mt-4 inline-flex rounded-xl bg-white p-1 ring-1 ring-black/5" role="group" aria-label="預覽模式">
+      <button onClick={() => setProductMode(false)} aria-pressed={!productMode} className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-ink ${!productMode ? 'bg-ink text-white' : 'text-black/50 hover:text-ink'}`}>編輯模式</button>
+      <button onClick={() => { setProductMode(true); setSnappedAnchor(null); }} aria-pressed={productMode} className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-ink ${productMode ? 'bg-ink text-white' : 'text-black/50 hover:text-ink'}`}>成品預覽</button>
     </div>}
-    <div className="relative z-10 mt-2.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-xl border border-stone-200/70 bg-white/70 px-3 py-2 text-[10px] text-slate-500 shadow-sm">
-      <span><b className="text-slate-700">ONLYFRAME 外框</b> 85 × 115 mm</span><span><b className="text-slate-700">我的小卡</b> {state.cardWidthMm.toFixed(1)} × {state.cardHeightMm.toFixed(1)} mm</span><span>左右剩餘 {((FRAME_WIDTH_MM - state.cardWidthMm) / 2).toFixed(1)} mm</span><span>上下剩餘 {((FRAME_HEIGHT_MM - state.cardHeightMm) / 2).toFixed(1)} mm</span>
-    </div>
-    {!productMode && nearMagnets && <p className="relative z-10 mt-1 text-[10px] text-amber-700 bg-amber-50/90 border border-amber-200 rounded-lg px-2 py-1">此元素接近磁吸位置，實際成品可能影響視覺效果。</p>}
-    <div className="absolute bottom-0 right-4 translate-y-full pt-2 flex items-center gap-1.5 text-[11px] text-slate-500 font-mono"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /><span>Prototype · 外框 85 × 115 mm</span></div>
+    <dl className="relative z-10 mt-3 grid grid-cols-2 gap-x-6 gap-y-1 font-mono text-xs text-black/45">
+      <div className="flex justify-between gap-2"><dt>外框</dt><dd className="text-ink">85 × 115 mm</dd></div>
+      <div className="flex justify-between gap-2"><dt>小卡</dt><dd className="text-ink">{state.cardWidthMm.toFixed(1)} × {state.cardHeightMm.toFixed(1)} mm</dd></div>
+      <div className="flex justify-between gap-2"><dt>左右留白</dt><dd className="text-ink">{((FRAME_WIDTH_MM - state.cardWidthMm) / 2).toFixed(1)} mm</dd></div>
+      <div className="flex justify-between gap-2"><dt>上下留白</dt><dd className="text-ink">{((FRAME_HEIGHT_MM - state.cardHeightMm) / 2).toFixed(1)} mm</dd></div>
+    </dl>
+    {!productMode && nearMagnets && <p role="status" className="relative z-10 mt-2 rounded-lg border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-900">此元素接近磁吸位置，實際成品可能影響視覺效果。</p>}
   </div>;
 };

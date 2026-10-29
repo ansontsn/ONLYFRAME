@@ -17,7 +17,8 @@ import { SubmitDesignModal } from './components/SubmitDesignModal';
 import { SubmissionSuccessView } from './components/SubmissionSuccessView';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { DesignSubmission } from './types';
-import { Download, Loader2 } from 'lucide-react';
+import { ArrowRight, DownloadSimple } from '@phosphor-icons/react';
+import { arrowNudge, btnPrimarySm, btnSecondarySm } from './components/ui';
 import { toPng } from 'html-to-image';
 import { getCardAnchorMm, isCardSizeSupported } from './utils/dimensions';
 
@@ -183,8 +184,14 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-slate-800 flex flex-col selection:bg-pink-500 selection:text-white pb-32 lg:pb-0">
-      
+    <div className="min-h-screen bg-paper text-ink flex flex-col pb-32 lg:pb-0">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-xl focus:bg-ink focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+      >
+        跳到主要內容
+      </a>
+
       {/* Top Navigation (Hidden in Admin view to allow dedicated admin layout) */}
       {currentView !== 'admin' && (
         <Navbar
@@ -196,7 +203,7 @@ export const App: React.FC = () => {
       )}
 
       {/* Main View Router */}
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
         
         {/* VIEW 1: HOME LANDING PAGE */}
         {currentView === 'home' && (
@@ -223,21 +230,22 @@ export const App: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
             
             {/* Top customizer breadcrumb bar */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-white/80 border border-stone-200/80 shadow-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-pink-500/10 text-pink-600 font-bold border border-pink-500/20">
-                  {customizerState.tier} 方案
+            <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="rounded-full bg-ink px-2 py-1 font-mono text-xs font-semibold text-white">
+                  {customizerState.tier}
                 </span>
-                <span className="text-xs text-slate-700 font-medium">
-                  {TIER_OPTIONS[customizerState.tier].name}：{TIER_OPTIONS[customizerState.tier].summary}
+                <span className="text-sm text-black/60">
+                  <span className="font-semibold text-ink">{TIER_OPTIONS[customizerState.tier].name}</span>
+                  ：{TIER_OPTIONS[customizerState.tier].summary}
                 </span>
               </div>
 
               <button
                 onClick={() => handleNavigate('tiers')}
-                className="text-xs text-slate-500 hover:text-pink-600 transition-colors underline underline-offset-4"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-black/55 transition-colors duration-300 ease-out hover:bg-black/5 hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
               >
-                更換客製化程度方案 →
+                更換方案
               </button>
             </div>
 
@@ -271,32 +279,33 @@ export const App: React.FC = () => {
                   onDeselect={() => { setIsTextSelected(false); setSelectedStickerId(null); }}
                   interactive={true}
                 />
-                <div className="flex flex-wrap items-center justify-center gap-2.5 mt-3.5 w-full max-w-sm px-2">
+                <div className="mt-4 flex w-full max-w-sm items-center justify-center gap-2 px-2">
                   <button
                     onClick={handleDownloadLiveMockup}
                     disabled={isDownloadingLive}
-                    className="flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold bg-white/85 hover:bg-white text-slate-700 hover:text-slate-900 border border-stone-200/80 hover:border-pink-500/40 transition-all flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
+                    aria-busy={isDownloadingLive}
+                    className={`flex-1 ${btnSecondarySm}`}
                     title="匯出當前卡框高畫質 PNG 圖片"
                   >
                     {isDownloadingLive ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-pink-500" />
-                        <span>生成相片中...</span>
-                      </>
+                      <span className="inline-flex items-center gap-2">
+                        <span className="h-4 w-4 animate-pulse rounded bg-black/10" aria-hidden="true" />
+                        正在產生圖片
+                      </span>
                     ) : (
                       <>
-                        <Download className="w-3.5 h-3.5 text-pink-500" />
-                        <span>下載相片 (PNG)</span>
+                        <DownloadSimple weight="bold" className="h-4 w-4" />
+                        下載 PNG
                       </>
                     )}
                   </button>
 
                   <button
                     onClick={() => handleNavigate('confirmation')}
-                    className="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white shadow-md shadow-pink-500/20 transition-all flex items-center justify-center gap-2 active:scale-95"
+                    className={`flex-1 ${btnPrimarySm}`}
                   >
-                    <img src="/logo.png" alt="ONLYFRAME" className="w-3.5 h-3.5 rounded-sm object-contain" />
-                    <span>完成設計 ➔</span>
+                    完成設計
+                    <ArrowRight weight="bold" className={arrowNudge} />
                   </button>
                 </div>
               </div>
@@ -381,24 +390,38 @@ export const App: React.FC = () => {
 
       {/* Clean Footer (Hidden in Admin view) */}
       {currentView !== 'admin' && (
-        <footer className="mt-auto border-t border-stone-200 bg-[#FAF8F5]/80 py-8 text-center text-xs text-slate-500">
-          <div className="max-w-7xl mx-auto px-4 space-y-2">
-            <p className="font-semibold text-slate-700">
-              ONLYFRAME · K-pop / 二次元收藏小卡客製化展示框互動平台
-            </p>
-            <p className="text-[11px] text-slate-500">
-              企管系畢業專題 MVP 研究 Prototype ‧ 專利打樣與展示概念 ‧ 網站功能與產品規格為研究 Prototype 測試內容
-            </p>
-            <div className="pt-2 flex items-center justify-center gap-3 text-[11px] text-slate-400">
-              <span>© 2026 ONLYFRAME 畢業專題研究團隊</span>
-              <span>•</span>
-              <button
-                onClick={() => handleNavigate('admin')}
-                className="text-slate-500 hover:text-purple-600 underline underline-offset-2 transition-colors font-medium"
-              >
-                管理者後台 (/admin)
-              </button>
+        <footer className="mt-auto border-t border-black/5 bg-paper">
+          <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-12 sm:px-6 md:flex-row md:items-start md:justify-between">
+            <div className="max-w-sm">
+              <img src="/logo-combination.png" alt="ONLYFRAME" className="h-8 w-auto object-contain" />
+              <p className="mt-4 text-sm text-black/55">
+                K-pop 與二次元收藏小卡客製化展示框互動平台。
+              </p>
+              <p className="mt-2 text-xs text-black/40">
+                企管系畢業專題研究原型 · 網站功能與產品規格為研究測試內容
+              </p>
             </div>
+            <nav aria-label="頁尾導覽" className="grid grid-cols-2 gap-x-12 gap-y-3 text-sm">
+              {([
+                ['home', '首頁'],
+                ['tiers', '方案選擇'],
+                ['customizer', '客製化編輯器'],
+                ['about', '關於概念'],
+                ['admin', '管理後台'],
+              ] as const).map(([view, label]) => (
+                <button
+                  key={view}
+                  onClick={() => handleNavigate(view)}
+                  aria-current={currentView === view ? 'page' : undefined}
+                  className="justify-self-start rounded text-black/55 transition-colors duration-300 ease-out hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-paper aria-[current=page]:font-semibold aria-[current=page]:text-ink"
+                >
+                  {label}
+                </button>
+              ))}
+            </nav>
+          </div>
+          <div className="border-t border-black/5">
+            <p className="mx-auto max-w-6xl px-4 py-6 text-xs text-black/40 sm:px-6">© 2026 ONLYFRAME 畢業專題研究團隊</p>
           </div>
         </footer>
       )}

@@ -1,14 +1,8 @@
 import React, { useState } from 'react';
 import { TIER_OPTIONS, getTierLabel } from '../data/tiers';
 import { DesignSubmission } from '../types';
-import { 
-  CheckCircle2, 
-  Copy, 
-  RotateCcw, 
-  Eye, 
-  Check, 
-  X 
-} from 'lucide-react';
+import { ArrowCounterClockwise, Check, CheckCircle, Copy, Eye, X } from '@phosphor-icons/react';
+import { btnPrimary, btnSecondary, focusRing } from './ui';
 
 interface SubmissionSuccessViewProps {
   submission: DesignSubmission;
@@ -28,177 +22,151 @@ export const SubmissionSuccessView: React.FC<SubmissionSuccessViewProps> = ({
     setTimeout(() => setCopied(false), 2500);
   };
 
+  const infoTiles = [
+    { label: '客製方案', value: getTierLabel(submission.plan) },
+    { label: '聯絡姓名', value: submission.customer_name },
+    { label: '電子信箱', value: submission.customer_email },
+  ];
+
+  const details = [
+    { label: '固定框體', value: submission.frame_style },
+    { label: '框體外觀色系', value: submission.frame_color },
+    { label: '背景樣式', value: submission.background },
+    { label: '裝飾配件', value: submission.decorations },
+    { label: '刻字內容', value: submission.custom_text },
+    { label: '字體選用', value: submission.font },
+  ];
+
   return (
-    <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-2xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-300">
-      
-      {/* Top Success Badge */}
-      <div className="text-center space-y-3">
-        <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-md border border-emerald-200">
-          <CheckCircle2 className="w-9 h-9 stroke-[2.2]" />
-        </div>
-        
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
-          你的設計已成功送出！
+    <div className="mx-auto max-w-2xl px-4 pb-24 pt-12 sm:px-6 lg:pt-20">
+
+      <div>
+        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-ink text-white">
+          <CheckCircle weight="fill" className="h-6 w-6" />
+        </span>
+        <h1 className="mt-6 bg-gradient-to-r from-[#000000] to-[#666666] bg-clip-text pb-1 text-4xl font-bold tracking-tight text-transparent sm:text-5xl sm:leading-tight">
+          設計已送出
         </h1>
-        <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-          我們已收到你的客製化設計。專題製作團隊將依據此規格進行打樣評估與研究分析。
+        <p className="mt-4 max-w-[680px] text-lg text-black/60">
+          我們收到你的客製化設計了。專題團隊會依這份規格進行打樣評估與研究分析。
         </p>
       </div>
 
-      {/* Main Ticket Card */}
-      <div className="relative rounded-3xl bg-white/95 border border-stone-200 shadow-xl overflow-hidden p-6 sm:p-8 space-y-6">
-        
-        {/* Top Header of Ticket */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-stone-200">
-          <div>
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest block font-mono">
-              OFFICIAL SUBMISSION CODE
-            </span>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="min-w-0 break-all text-lg sm:text-3xl font-black text-slate-900 font-mono tracking-tight">
+      <div className="mt-12 rounded-3xl border border-black/5 bg-white p-6 sm:p-8">
+
+        <div className="flex flex-col justify-between gap-6 border-b border-black/5 pb-6 sm:flex-row sm:items-end">
+          <div className="min-w-0">
+            <span className="block text-xs font-semibold uppercase tracking-widest text-black/40">設計編號</span>
+            <div className="mt-2 flex items-center gap-2">
+              <span className="min-w-0 break-all font-mono text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
                 {submission.submission_code}
               </span>
               <button
                 onClick={handleCopyCode}
-                className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-slate-600 transition-colors"
+                className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg text-black/55 transition-colors duration-300 ease-out hover:bg-black/5 hover:text-ink ${focusRing}`}
                 title="複製設計編號"
+                aria-label="複製設計編號"
               >
-                {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                {copied ? <Check weight="bold" className="h-4 w-4 text-emerald-700" /> : <Copy weight="bold" className="h-4 w-4" />}
               </button>
             </div>
-            {copied && <span className="text-[10px] text-emerald-600 font-semibold">已複製到剪貼簿！</span>}
+            <p role="status" className="mt-1 h-4 text-xs text-emerald-700">{copied ? '已複製設計編號' : ''}</p>
           </div>
 
-          <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center">
-            <span className="text-xs text-slate-400 font-medium">客製程度</span>
-            <span className="text-2xl sm:text-3xl font-black text-pink-600 font-mono">
-              {TIER_OPTIONS[submission.plan].level}
-            </span>
+          <div className="sm:text-right">
+            <span className="block text-xs text-black/40">客製程度</span>
+            <span className="mt-1 block text-lg font-semibold text-ink">{TIER_OPTIONS[submission.plan].level}</span>
           </div>
         </div>
 
-        {/* Info Grid */}
-        <div className="grid grid-cols-2 gap-4 text-xs">
-          <div className="p-3 rounded-2xl bg-stone-50 border border-stone-200/80">
-            <span className="text-[10px] text-slate-400 font-medium block">客製方案</span>
-            <span className="font-bold text-slate-800 text-sm mt-0.5 block">{getTierLabel(submission.plan)}</span>
+        <dl className="mt-6 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+          {infoTiles.map((tile) => (
+            <div key={tile.label} className="rounded-2xl bg-paper p-4">
+              <dt className="text-xs text-black/40">{tile.label}</dt>
+              <dd className="mt-1 truncate font-semibold text-ink">{tile.value}</dd>
+            </div>
+          ))}
+          <div className="rounded-2xl bg-paper p-4">
+            <dt className="text-xs text-black/40">設計狀態</dt>
+            <dd className="mt-1">
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-ink">
+                <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden="true" />
+                待處理
+              </span>
+            </dd>
           </div>
+        </dl>
 
-          <div className="p-3 rounded-2xl bg-stone-50 border border-stone-200/80">
-            <span className="text-[10px] text-slate-400 font-medium block">設計狀態</span>
-            <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-              待處理 (Pending)
-            </span>
-          </div>
-
-          <div className="p-3 rounded-2xl bg-stone-50 border border-stone-200/80">
-            <span className="text-[10px] text-slate-400 font-medium block">聯絡姓名</span>
-            <span className="font-bold text-slate-800 mt-0.5 block truncate">{submission.customer_name}</span>
-          </div>
-
-          <div className="p-3 rounded-2xl bg-stone-50 border border-stone-200/80">
-            <span className="text-[10px] text-slate-400 font-medium block">電子信箱</span>
-            <span className="font-bold text-slate-800 mt-0.5 block truncate">{submission.customer_email}</span>
-          </div>
-        </div>
-
-        {/* Preview Image Thumbnail if available */}
         {submission.preview_image_url && (
-          <div className="p-3 rounded-2xl bg-stone-100/70 border border-stone-200 flex items-center gap-4">
-            <img 
-              src={submission.preview_image_url} 
-              alt="展示框成品打樣預覽" 
-              className="w-16 h-24 object-contain rounded-xl bg-white shadow-sm border border-stone-200 flex-shrink-0"
+          <div className="mt-3 flex items-center gap-4 rounded-2xl bg-paper p-4">
+            <img
+              src={submission.preview_image_url}
+              alt="展示框成品打樣預覽"
+              className="h-24 w-16 shrink-0 rounded-lg bg-white object-contain"
             />
-            <div className="text-xs space-y-1 min-w-0">
-              <span className="font-bold text-slate-800 block">3D 壓克力打樣預覽</span>
-              <p className="text-[11px] text-slate-500">
-                已成功產生高畫質成品渲染照，後台團隊可隨時還原查看。
-              </p>
+            <div className="min-w-0">
+              <span className="block text-sm font-semibold text-ink">展示框打樣預覽圖</span>
+              <p className="mt-1 text-xs text-black/50">預覽圖已和設計一起保存，專題團隊可以在後台查看。</p>
             </div>
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-          <button
-            onClick={() => setIsDetailOpen(true)}
-            className="w-full sm:flex-1 py-3.5 px-5 rounded-2xl font-bold text-xs bg-white hover:bg-stone-50 text-slate-800 border border-stone-300 shadow-sm transition-all flex items-center justify-center gap-2"
-          >
-            <Eye className="w-4 h-4 text-pink-500" />
-            <span>查看我的設計明細</span>
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+          <button onClick={() => setIsDetailOpen(true)} className={`sm:flex-1 ${btnSecondary}`}>
+            <Eye weight="bold" className="h-4 w-4" />
+            查看設計明細
           </button>
-
-          <button
-            onClick={onReset}
-            className="w-full sm:flex-1 py-3.5 px-5 rounded-2xl font-bold text-xs bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white shadow-lg shadow-pink-500/25 transition-all flex items-center justify-center gap-2 active:scale-95"
-          >
-            <RotateCcw className="w-4 h-4" />
-            <span>重新製作另一個卡框</span>
+          <button onClick={onReset} className={`sm:flex-1 ${btnPrimary}`}>
+            <ArrowCounterClockwise weight="bold" className="h-4 w-4" />
+            再設計一個卡框
           </button>
         </div>
 
       </div>
 
-      {/* Detail Modal */}
       {isDetailOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-          <div className="relative w-full max-w-lg rounded-3xl bg-[#FAF8F5] border border-stone-200 shadow-2xl p-6 sm:p-7 space-y-5 text-slate-800 max-h-[90vh] overflow-y-auto">
-            
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm" onClick={() => setIsDetailOpen(false)} role="presentation">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="submission-detail-title"
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-6 shadow-[0_40px_120px_-40px_rgba(0,0,0,0.5)] sm:p-8"
+          >
             <button
               onClick={() => setIsDetailOpen(false)}
-              className="absolute top-5 right-5 p-2 rounded-full bg-stone-200/60 hover:bg-stone-200 text-slate-600 transition-colors"
+              aria-label="關閉設計明細"
+              className={`absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full text-black/50 transition-colors duration-300 ease-out hover:bg-black/5 hover:text-ink ${focusRing}`}
             >
-              <X className="w-5 h-5" />
+              <X weight="bold" className="h-5 w-5" />
             </button>
 
-            <h3 className="text-lg font-black text-slate-900">
-              設計明細 · {submission.submission_code}
+            <p className="text-xs font-semibold uppercase tracking-widest text-black/40">設計明細</p>
+            <h3 id="submission-detail-title" className="mt-1 pr-12 font-mono text-lg font-semibold text-ink">
+              {submission.submission_code}
             </h3>
 
-            <div className="space-y-2 text-xs border-y border-stone-200 py-3">
-              <div className="flex justify-between py-1">
-                <span className="text-slate-500">固定框體:</span>
-                <span className="font-bold text-slate-800">{submission.frame_style}</span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-slate-500">框體外觀色系:</span>
-                <span className="font-bold text-slate-800">{submission.frame_color}</span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-slate-500">背景樣式:</span>
-                <span className="font-bold text-slate-800">{submission.background}</span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-slate-500">裝飾配件:</span>
-                <span className="font-bold text-slate-800">{submission.decorations}</span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-slate-500">刻字內容:</span>
-                <span className="font-bold text-slate-800">{submission.custom_text}</span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-slate-500">字體選用:</span>
-                <span className="font-bold text-slate-800">{submission.font}</span>
-              </div>
-            </div>
+            <dl className="mt-4 divide-y divide-black/5 border-y border-black/5 text-sm">
+              {details.map((row) => (
+                <div key={row.label} className="flex justify-between gap-4 py-3">
+                  <dt className="shrink-0 text-black/45">{row.label}</dt>
+                  <dd className="text-right font-medium text-ink">{row.value}</dd>
+                </div>
+              ))}
+            </dl>
 
             {submission.preview_image_url && (
-              <div className="space-y-2">
-                <span className="text-xs font-bold text-slate-700 block">打樣成品預覽：</span>
-                <div className="rounded-2xl border border-stone-200 p-2 bg-white flex justify-center">
-                  <img src={submission.preview_image_url} alt="預覽圖" className="max-h-60 object-contain rounded-xl" />
+              <div className="mt-4">
+                <span className="block text-xs font-semibold uppercase tracking-widest text-black/40">打樣成品預覽</span>
+                <div className="mt-2 flex justify-center rounded-2xl bg-paper p-3">
+                  <img src={submission.preview_image_url} alt="展示框打樣預覽圖" className="max-h-60 rounded-xl object-contain" />
                 </div>
               </div>
             )}
 
-            <button
-              onClick={() => setIsDetailOpen(false)}
-              className="w-full py-2.5 rounded-xl bg-stone-200 hover:bg-stone-300 font-bold text-xs text-slate-700 transition-colors"
-            >
+            <button onClick={() => setIsDetailOpen(false)} className={`mt-6 w-full ${btnSecondary}`}>
               關閉明細
             </button>
-
           </div>
         </div>
       )}

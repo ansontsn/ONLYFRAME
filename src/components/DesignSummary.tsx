@@ -1,19 +1,14 @@
 import React from 'react';
+import { ArrowRight, Check, Info } from '@phosphor-icons/react';
 import { CustomizerState } from '../types';
 import { TIER_OPTIONS, getTierLabel } from '../data/tiers';
 import { FRAME_OPTIONS, FRAME_COLOR_OPTIONS, BACKGROUND_OPTIONS } from '../data/options';
-import { ArrowRight, Tag, Info, Check } from 'lucide-react';
+import { arrowNudge, btnPrimary } from './ui';
 
 interface DesignSummaryProps {
   state: CustomizerState;
   onFinishDesign: () => void;
 }
-
-const TIER_BADGES: Record<string, { label: string; color: string }> = {
-  BASIC: { label: getTierLabel('BASIC'), color: 'text-slate-300 bg-slate-800 border-slate-700' },
-  CUSTOM: { label: getTierLabel('CUSTOM'), color: 'text-purple-300 bg-purple-950/60 border-purple-800' },
-  PREMIUM: { label: getTierLabel('PREMIUM'), color: 'text-pink-300 bg-pink-950/60 border-pink-800' }
-};
 
 export const DesignSummary: React.FC<DesignSummaryProps> = ({
   state,
@@ -22,123 +17,77 @@ export const DesignSummary: React.FC<DesignSummaryProps> = ({
   const frameOpt = FRAME_OPTIONS.find(f => f.id === state.frameStyleId) || FRAME_OPTIONS[0];
   const colorOpt = FRAME_COLOR_OPTIONS.find(c => c.id === state.frameColorId) || FRAME_COLOR_OPTIONS[0];
   const bgOpt = BACKGROUND_OPTIONS.find(b => b.id === state.backgroundId) || BACKGROUND_OPTIONS[0];
-  const badge = TIER_BADGES[state.tier] || TIER_BADGES.BASIC;
+  const plan = TIER_OPTIONS[state.tier];
+
+  const rows: { label: string; value: React.ReactNode }[] = [
+    { label: '固定框體', value: frameOpt.name },
+    {
+      label: '框體色系',
+      value: (
+        <span className="inline-flex items-center gap-2">
+          <span className="h-3 w-3 rounded-full border border-black/15" style={{ background: colorOpt.hex }} />
+          {colorOpt.name.split(' ')[0]}
+        </span>
+      ),
+    },
+    { label: '背景樣式', value: plan.background ? bgOpt.name : '原色透亮' },
+    { label: '原創貼飾', value: plan.stickers ? `${state.stickers.length} 枚` : '無' },
+    { label: '客製文字', value: state.tier === 'BASIC' || !state.text.content ? '無' : state.text.content },
+    { label: '小卡預覽', value: state.isCustomPhoto ? '個人上傳卡片模擬' : state.photocardUrl ? '示範卡模擬' : '純空框展示' },
+  ];
+
+  const adjustable = [
+    '框體外觀',
+    ...(plan.text ? ['自訂文字與配置'] : []),
+    ...(plan.background ? ['主題背景', '自由裝飾：位置、大小、旋轉與多元素配置'] : []),
+  ];
 
   return (
-    <div className="flex flex-col h-full bg-[#12141c]/90 rounded-2xl border border-white/10 p-5 shadow-2xl backdrop-blur-xl justify-between">
-      <div className="space-y-4">
-        
-        {/* Header & Current Tier */}
-        <div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-wider text-slate-400 font-bold flex items-center gap-1.5">
-              <Tag className="w-3.5 h-3.5 text-pink-400" />
-              目前方案與配置
-            </span>
-            <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${badge.color}`}>
-              {badge.label}
-            </span>
-          </div>
-          <h2 className="text-xl font-black text-white mt-1">
-            展示框配置清單
-          </h2>
+    <div className="flex h-full flex-col overflow-hidden rounded-3xl border border-black/5 bg-white">
+      <div className="min-h-0 flex-1 overflow-y-auto p-6">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs font-semibold uppercase tracking-widest text-black/40">目前配置</span>
+          <span className="rounded-full bg-paper px-2 py-1 font-mono text-xs font-semibold text-black/60">{getTierLabel(state.tier)}</span>
+        </div>
+        <h2 className="mt-2 text-xl font-semibold text-ink">展示框配置清單</h2>
+
+        <dl className="mt-4 divide-y divide-black/5 border-y border-black/5 text-sm">
+          {rows.map((row) => (
+            <div key={row.label} className="flex items-center justify-between gap-4 py-3">
+              <dt className="shrink-0 text-black/45">{row.label}</dt>
+              <dd className="truncate text-right font-medium text-ink">{row.value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <p className="mt-6 text-xs font-semibold uppercase tracking-widest text-black/40">目前可調整</p>
+        <ul className="mt-3 space-y-2 text-sm text-black/70">
+          {adjustable.map((feature) => (
+            <li key={feature} className="flex items-start gap-2">
+              <Check weight="bold" className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+              {feature}
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-4 rounded-2xl bg-paper p-4">
+          <span className="block text-xs font-semibold text-black/45">{plan.level}</span>
+          <p className="mt-1 text-sm font-semibold text-ink">{plan.summary}</p>
+          <p className="mt-1 text-xs text-black/45">小卡上傳與即時預覽為三種方案的共同工具。</p>
         </div>
 
-        {/* Selected Config List */}
-        <div className="space-y-2 py-2 border-y border-white/10 text-xs text-slate-300">
-          <div className="flex justify-between items-center py-1">
-            <span className="text-slate-400">固定框體:</span>
-            <span className="font-semibold text-white truncate max-w-[140px] text-right">
-              {frameOpt.name}
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center py-1">
-            <span className="text-slate-400">框體色系:</span>
-            <span className="font-semibold text-white flex items-center gap-1.5">
-              <span 
-                className="w-2.5 h-2.5 rounded-full border border-white/40" 
-                style={{ background: colorOpt.hex }}
-              />
-              {colorOpt.name.split(' ')[0]}
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center py-1">
-            <span className="text-slate-400">背景樣式:</span>
-            <span className="font-semibold text-white truncate max-w-[140px] text-right">
-              {TIER_OPTIONS[state.tier].background ? bgOpt.name : '原色透亮'}
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center py-1">
-            <span className="text-slate-400">原創貼飾:</span>
-            <span className="font-semibold text-white">
-              {TIER_OPTIONS[state.tier].stickers ? `${state.stickers.length} 枚` : '無'}
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center py-1">
-            <span className="text-slate-400">客製文字:</span>
-            <span className="font-semibold text-white truncate max-w-[130px] text-right">
-              {state.tier === 'BASIC' || !state.text.content ? '無' : state.text.content}
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center py-1">
-            <span className="text-slate-400">小卡預覽:</span>
-            <span className="font-semibold text-white">
-              {state.isCustomPhoto ? '個人上傳卡片模擬' : state.photocardUrl ? '示範卡模擬' : '純空框展示'}
-            </span>
-          </div>
-        </div>
-
-        {/* Available customization tools */}
-        <div className="space-y-2 pt-1">
-          <span className="text-xs font-bold text-slate-400 block uppercase tracking-wider">
-            目前可調整的內容
-          </span>
-
-          <div className="space-y-1.5 text-xs">
-            {['框體外觀', ...(TIER_OPTIONS[state.tier].text ? ['自訂文字與配置'] : []), ...(TIER_OPTIONS[state.tier].background ? ['主題背景', '自由裝飾：位置、大小、旋轉與多元素配置'] : [])].map((feature) => (
-              <div key={feature} className="flex text-pink-300/90 text-[11px]">
-                <span className="flex items-center gap-1">
-                  <Check className="w-3 h-3 text-pink-400" />
-                  {feature}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-3 p-3.5 rounded-xl bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border border-pink-500/20 space-y-1">
-            <span className="text-[10px] font-bold text-slate-400 block">{TIER_OPTIONS[state.tier].level}</span>
-            <p className="text-sm font-bold text-pink-300">{TIER_OPTIONS[state.tier].summary}</p>
-            <p className="text-[11px] text-slate-400">小卡上傳與即時預覽為三種方案的共同工具。</p>
-          </div>
-        </div>
-
-        {/* Prototype Disclaimer */}
-        <div className="flex items-start gap-2 p-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-[11px] text-slate-400">
-          <Info className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
-          <p className="leading-tight">
-            網站內容與產品規格僅供畢業專題研究與展示使用，不進行實際販售。
-          </p>
-        </div>
-
+        <p className="mt-4 flex items-start gap-2 text-xs text-black/40">
+          <Info weight="bold" className="mt-0.5 h-4 w-4 shrink-0" />
+          網站內容與產品規格僅供畢業專題研究與展示使用，不進行實際販售。
+        </p>
       </div>
 
-      {/* Primary CTA: Finish Design */}
-      <div className="pt-4">
-        <button
-          onClick={onFinishDesign}
-          className="w-full py-3.5 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white shadow-xl shadow-pink-500/25 transition-all duration-200 active:scale-98 flex items-center justify-center gap-2.5 group"
-        >
-          <img src="/logo.png" alt="ONLYFRAME" className="w-4 h-4 rounded object-contain shadow-xs" />
-          <span>完成設計 ‧ 查看成品</span>
-          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+      <div className="shrink-0 border-t border-black/5 p-4">
+        <button onClick={onFinishDesign} className={`w-full ${btnPrimary}`}>
+          完成設計，查看成品
+          <ArrowRight weight="bold" className={arrowNudge} />
         </button>
       </div>
-
     </div>
   );
 };
