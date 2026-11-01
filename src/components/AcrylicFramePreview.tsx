@@ -18,18 +18,21 @@ interface AcrylicFramePreviewProps {
   onSelectText?: () => void;
   onDeselect?: () => void;
   interactive?: boolean;
+  displayOnly?: boolean;
+  exporting?: boolean;
 }
 
 const ANCHORS: CardAnchor[] = ['top-left', 'top-center', 'top-right', 'center-left', 'center-right', 'bottom-left', 'bottom-center', 'bottom-right'];
 
-export const AcrylicFramePreview: React.FC<AcrylicFramePreviewProps> = ({ state: inputState, onUpdateStickerPosition, selectedStickerId, onSelectSticker, onUpdateTextPosition, onUpdateTextBox, isTextSelected = false, onSelectText, onDeselect, interactive = true }) => {
+export const AcrylicFramePreview: React.FC<AcrylicFramePreviewProps> = ({ state: inputState, onUpdateStickerPosition, selectedStickerId, onSelectSticker, onUpdateTextPosition, onUpdateTextBox, isTextSelected = false, onSelectText, onDeselect, interactive = true, displayOnly = false, exporting = false }) => {
   const state = normalizeDesignForTier(inputState);
   const frameOpt = FRAME_OPTIONS.find(f => f.id === state.frameStyleId) || FRAME_OPTIONS[0];
   const colorOpt = FRAME_COLOR_OPTIONS.find(c => c.id === state.frameColorId) || FRAME_COLOR_OPTIONS[0];
   const bgOpt = BACKGROUND_OPTIONS.find(b => b.id === state.backgroundId) || BACKGROUND_OPTIONS[0];
   const frameRef = useRef<HTMLDivElement>(null);
   const [draggingStickerId, setDraggingStickerId] = useState<string | null>(null);
-  const [productMode, setProductMode] = useState(!interactive);
+  const [manualProductMode, setProductMode] = useState(!interactive);
+  const productMode = manualProductMode || exporting;
   const [snappedAnchor, setSnappedAnchor] = useState<CardAnchor | null>(null);
   const [scale, setScale] = useState(320 / FRAME_WIDTH_MM);
   useLayoutEffect(() => {
@@ -87,9 +90,9 @@ export const AcrylicFramePreview: React.FC<AcrylicFramePreviewProps> = ({ state:
     return <div key={index} className="absolute rounded-full z-40 shadow-md flex items-center justify-center pointer-events-none bg-gradient-to-tr from-slate-500 via-slate-200 to-white border border-slate-300" style={{ left, top, width: mmToPx(MAGNET_DIAMETER_MM, scale), height: mmToPx(MAGNET_DIAMETER_MM, scale), transform: 'translate(-50%, -50%)' }}><div className="w-2.5 h-[1.5px] rounded-full bg-slate-700/80" /></div>;
   };
 
-  return <div className="relative flex flex-col items-center justify-center p-4 select-none w-full">
-    <div className="absolute -inset-4 rounded-full blur-3xl opacity-35 transition-all duration-700 pointer-events-none" style={{ background: colorOpt.glowColor }} />
-    <div ref={frameRef} id="acrylic-display-frame" onPointerDown={() => { if (interactive && !productMode) onDeselect?.(); }} className={`relative max-w-full ${frameOpt.cornerStyle} transition-all duration-300 overflow-hidden acrylic-card shadow-acrylic ${colorOpt.outerBorder}`} style={{ width: 'min(320px, 100%, 50.26vh)', aspectRatio: `${FRAME_WIDTH_MM} / ${FRAME_HEIGHT_MM}`, boxShadow: `0 20px 45px -10px rgba(15, 23, 42, 0.16), 0 0 25px ${colorOpt.glowColor}25, inset 0 1px 2px rgba(255,255,255,0.85)` }}>
+  return <div className={`relative flex flex-col items-center justify-center select-none w-full ${displayOnly ? '' : 'p-4'}`}>
+    {!displayOnly && <div className="absolute -inset-4 rounded-full blur-3xl opacity-35 transition-all duration-700 pointer-events-none" style={{ background: colorOpt.glowColor }} />}
+    <div ref={frameRef} id={displayOnly ? undefined : 'acrylic-display-frame'} data-frame-preview onPointerDown={() => { if (interactive && !productMode) onDeselect?.(); }} className={`relative ${displayOnly ? 'w-full' : 'w-full max-w-[290px] sm:max-w-[390px]'} ${frameOpt.cornerStyle} transition-all duration-300 overflow-hidden acrylic-card ${colorOpt.outerBorder}`} style={{ background: colorOpt.hex, aspectRatio: `${FRAME_WIDTH_MM} / ${FRAME_HEIGHT_MM}`, boxShadow: '4px 5px 0 rgba(154,151,145,.27), 6px 7px 0 rgba(255,255,255,.8), 16px 28px 38px -15px rgba(34,31,27,.25), inset 0 1px 3px rgba(255,255,255,.95)' }}>
       <div className="absolute inset-0 pointer-events-none rounded-[inherit] border border-white/60 z-50" />
       <div className="absolute inset-0 pointer-events-none glass-reflection rotate-25 opacity-70 z-20" style={{ width: '200%', height: '200%', top: '-50%', left: '-50%' }} />
       <div className={`absolute inset-[4%] rounded-xl overflow-hidden transition-all duration-500 z-0 ${bgOpt.cssClass}`} style={state.customBgUrl ? { backgroundImage: `url(${state.customBgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}>
@@ -98,7 +101,7 @@ export const AcrylicFramePreview: React.FC<AcrylicFramePreviewProps> = ({ state:
 
       <div className="absolute z-10 rounded-[4%] overflow-hidden p-[1%] bg-white/10 backdrop-blur-sm shadow-2xl border border-white/25" style={{ left: mmToPx(cardXmm, scale), top: mmToPx(cardYmm, scale), width: mmToPx(state.cardWidthMm, scale), height: mmToPx(state.cardHeightMm, scale) }}>
         <div className="relative w-full h-full rounded-[3%] overflow-hidden bg-slate-900 shadow-inner">
-          {state.photocardUrl ? <img src={state.photocardUrl} alt={state.photocardName || '收藏小卡'} className="w-full h-full object-cover select-none pointer-events-none" draggable={false} /> : <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900 p-2 text-center"><Sparkles className="w-8 h-8 text-pink-400 mb-2 opacity-60" /><span className="text-xs font-semibold text-slate-300">尚未置入小卡</span><span className="text-[10px] text-slate-500 mt-1">可在左側選擇示範卡</span></div>}
+          {state.photocardUrl ? <img src={state.photocardUrl} alt={state.photocardName || '收藏小卡'} className="w-full h-full object-cover select-none pointer-events-none" draggable={false} /> : <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900 p-2 text-center"><Sparkles className="w-8 h-8 text-pink-400 mb-2 opacity-60" /><span className="text-xs font-semibold text-slate-300">尚未置入小卡</span><span className="text-[11px] text-slate-500 mt-1">可在左側選擇示範卡</span></div>}
           <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent pointer-events-none" />
         </div>
       </div>
@@ -109,7 +112,7 @@ export const AcrylicFramePreview: React.FC<AcrylicFramePreviewProps> = ({ state:
         {state.stickers.map(sticker => {
           const isSelected = selectedStickerId === sticker.id;
           const isDragging = draggingStickerId === sticker.id;
-          return <div key={sticker.id} onClick={e => { e.stopPropagation(); if (interactive && !productMode) onSelectSticker?.(sticker.id); }} onPointerDown={e => { if (!interactive || productMode || !onUpdateStickerPosition) return; onSelectSticker?.(sticker.id); setDraggingStickerId(sticker.id); startDrag(e, (x, y, anchor) => onUpdateStickerPosition(sticker.id, x, y, anchor), () => setDraggingStickerId(null)); }} className={`absolute -translate-x-1/2 -translate-y-1/2 ${interactive && !productMode ? 'pointer-events-auto cursor-grab active:cursor-grabbing' : 'pointer-events-none'} select-none touch-none ${isSelected && !productMode ? 'outline outline-2 outline-pink-400/80 outline-offset-2 rounded-md z-30' : interactive && !productMode ? 'hover:outline hover:outline-1 hover:outline-pink-300/60 hover:outline-offset-1 rounded-md' : ''}`} style={{ left: mmToPx(sticker.xMm, scale), top: mmToPx(sticker.yMm, scale), width: mmToPx(sticker.widthMm, scale), height: mmToPx(sticker.heightMm, scale), lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: sticker.zIndex || 20, transform: `translate(-50%, -50%) rotate(${sticker.rotation}deg)`, filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.2))' }} title={interactive && !productMode ? '點擊選中或拖曳調整位置' : undefined}><StickerArtwork stickerId={sticker.stickerId} fallback={sticker.symbol} className="w-full h-full pointer-events-none" />{interactive && !productMode && <span className={`absolute -top-2 -right-2 text-[9px] bg-white/90 rounded-full px-1 text-pink-600 border border-pink-300/60 ${isSelected || isDragging ? 'opacity-100' : 'opacity-0 hover:opacity-100'}`}><Move className="w-2.5 h-2.5 inline" /></span>}</div>;
+          return <div key={sticker.id} onClick={e => { e.stopPropagation(); if (interactive && !productMode) onSelectSticker?.(sticker.id); }} onPointerDown={e => { if (!interactive || productMode || !onUpdateStickerPosition) return; onSelectSticker?.(sticker.id); setDraggingStickerId(sticker.id); startDrag(e, (x, y, anchor) => onUpdateStickerPosition(sticker.id, x, y, anchor), () => setDraggingStickerId(null)); }} className={`absolute -translate-x-1/2 -translate-y-1/2 ${interactive && !productMode ? 'pointer-events-auto cursor-grab active:cursor-grabbing' : 'pointer-events-none'} select-none touch-none ${isSelected && !productMode ? 'outline outline-2 outline-pink-400/80 outline-offset-2 rounded-md z-30' : interactive && !productMode ? 'hover:outline hover:outline-1 hover:outline-pink-300/60 hover:outline-offset-1 rounded-md' : ''}`} style={{ left: mmToPx(sticker.xMm, scale), top: mmToPx(sticker.yMm, scale), width: mmToPx(sticker.widthMm, scale), height: mmToPx(sticker.heightMm, scale), lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: sticker.zIndex || 20, transform: `translate(-50%, -50%) rotate(${sticker.rotation}deg)`, filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.2))' }} title={interactive && !productMode ? '點擊選中或拖曳調整位置' : undefined}><StickerArtwork stickerId={sticker.stickerId} fallback={sticker.symbol} className="w-full h-full pointer-events-none" />{interactive && !productMode && <span className={`absolute -top-2 -right-2 text-[11px] bg-white/90 rounded-full px-1 text-pink-600 border border-pink-300/60 ${isSelected || isDragging ? 'opacity-100' : 'opacity-0 hover:opacity-100'}`}><Move className="w-2.5 h-2.5 inline" /></span>}</div>;
         })}
       </div>}
 
@@ -129,16 +132,14 @@ export const AcrylicFramePreview: React.FC<AcrylicFramePreviewProps> = ({ state:
       <div className="absolute bottom-[1.5%] inset-x-[5%] h-[1px] bg-white/30 rounded-full pointer-events-none z-50" />
     </div>
 
-    {interactive && <div className="relative z-10 mt-4 inline-flex rounded-xl bg-white p-1 ring-1 ring-black/5" role="group" aria-label="預覽模式">
-      <button onClick={() => setProductMode(false)} aria-pressed={!productMode} className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-ink ${!productMode ? 'bg-ink text-white' : 'text-black/50 hover:text-ink'}`}>編輯模式</button>
-      <button onClick={() => { setProductMode(true); setSnappedAnchor(null); }} aria-pressed={productMode} className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-ink ${productMode ? 'bg-ink text-white' : 'text-black/50 hover:text-ink'}`}>成品預覽</button>
+    {interactive && <div className="relative z-10 mt-3 inline-flex rounded-xl bg-white/80 border border-stone-200 p-1 shadow-sm">
+      <button onClick={() => setProductMode(false)} className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold ${!productMode ? 'bg-slate-800 text-white' : 'text-slate-500'}`}>編輯模式</button>
+      <button onClick={() => { setProductMode(true); setSnappedAnchor(null); }} className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold ${productMode ? 'bg-slate-800 text-white' : 'text-slate-500'}`}>成品預覽</button>
     </div>}
-    <dl className="relative z-10 mt-3 grid grid-cols-2 gap-x-6 gap-y-1 font-mono text-xs text-black/45">
-      <div className="flex justify-between gap-2"><dt>外框</dt><dd className="text-ink">85 × 115 mm</dd></div>
-      <div className="flex justify-between gap-2"><dt>小卡</dt><dd className="text-ink">{state.cardWidthMm.toFixed(1)} × {state.cardHeightMm.toFixed(1)} mm</dd></div>
-      <div className="flex justify-between gap-2"><dt>左右留白</dt><dd className="text-ink">{((FRAME_WIDTH_MM - state.cardWidthMm) / 2).toFixed(1)} mm</dd></div>
-      <div className="flex justify-between gap-2"><dt>上下留白</dt><dd className="text-ink">{((FRAME_HEIGHT_MM - state.cardHeightMm) / 2).toFixed(1)} mm</dd></div>
-    </dl>
-    {!productMode && nearMagnets && <p role="status" className="relative z-10 mt-2 rounded-lg border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-900">此元素接近磁吸位置，實際成品可能影響視覺效果。</p>}
+    {!displayOnly && <div className="relative z-10 mt-2.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-3 py-2 text-[11px] text-slate-500">
+      <span><b className="text-slate-700">ONLYFRAME 外框</b> 85 × 115 mm</span><span><b className="text-slate-700">我的小卡</b> {state.cardWidthMm.toFixed(1)} × {state.cardHeightMm.toFixed(1)} mm</span><span>左右剩餘 {((FRAME_WIDTH_MM - state.cardWidthMm) / 2).toFixed(1)} mm</span><span>上下剩餘 {((FRAME_HEIGHT_MM - state.cardHeightMm) / 2).toFixed(1)} mm</span>
+    </div>}
+    {!productMode && nearMagnets && <p className="relative z-10 mt-1 text-[11px] text-amber-700 bg-amber-50/90 border border-amber-200 rounded-lg px-2 py-1">此元素接近磁吸位置，實際成品可能影響視覺效果。</p>}
+    {!displayOnly && <p className="relative z-10 mt-2 text-[11px] text-slate-500">概念效果示意 · 非實體成品照片</p>}
   </div>;
 };

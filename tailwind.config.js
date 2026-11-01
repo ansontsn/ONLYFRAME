@@ -8,6 +8,7 @@ export default {
     extend: {
       colors: {
         ink: '#141414',
+        pink: { 50: '#FCF1F5', 100: '#F9E8EE', 200: '#ECAFC5', 300: '#DD759A', 400: '#C8386C', 500: '#C8386C', 600: '#B12D5D', 700: '#93244C', 900: '#612039', 950: '#3D1826' },
         paper: '#F7F5F2',
         brand: { DEFAULT: '#C8386C', deep: '#A82A58', soft: '#F9E8EE' },
         dark: {
@@ -26,7 +27,7 @@ export default {
       fontFamily: {
         sans: ['Manrope', 'Noto Sans TC', 'system-ui', 'sans-serif'],
         display: ['Manrope', 'Noto Sans TC', 'sans-serif'],
-        mono: ['Geist Mono', 'ui-monospace', 'monospace'],
+        mono: ['JetBrains Mono', 'monospace'],
         korean: ['Pretendard', 'Noto Sans TC', 'sans-serif']
       },
       boxShadow: {

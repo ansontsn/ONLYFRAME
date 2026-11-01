@@ -1,0 +1,339 @@
+{
+  "checkedAt": "2026-11-01T12:31:34.672Z",
+  "checks": [
+    {
+      "name": "desktop home: no horizontal overflow",
+      "result": "pass",
+      "evidence": {
+        "viewport": 1440,
+        "scroll": 1440
+      }
+    },
+    {
+      "name": "desktop hero swatches update the rendered frame",
+      "result": "pass"
+    },
+    {
+      "name": "desktop inspiration shows three complete frame examples",
+      "result": "pass"
+    },
+    {
+      "name": "desktop tier previews have identical dimensions",
+      "result": "pass",
+      "evidence": [
+        {
+          "w": 146,
+          "h": 197.515625
+        },
+        {
+          "w": 146,
+          "h": 197.515625
+        },
+        {
+          "w": 146,
+          "h": 197.515625
+        }
+      ]
+    },
+    {
+      "name": "desktop tiers: no horizontal overflow",
+      "result": "pass",
+      "evidence": {
+        "viewport": 1440,
+        "scroll": 1440
+      }
+    },
+    {
+      "name": "desktop five tools fit without horizontal scrolling; one confirm CTA",
+      "result": "pass",
+      "evidence": {
+        "width": 500,
+        "scroll": 500
+      }
+    },
+    {
+      "name": "desktop editor: no horizontal overflow",
+      "result": "pass",
+      "evidence": {
+        "viewport": 1440,
+        "scroll": 1440
+      }
+    },
+    {
+      "name": "desktop preset selection and card upload update preview",
+      "result": "pass"
+    },
+    {
+      "name": "desktop unsupported card size blocks confirmation; preset restores valid size",
+      "result": "pass"
+    },
+    {
+      "name": "desktop editor frame swatch updates actual frame fill",
+      "result": "pass"
+    },
+    {
+      "name": "desktop text editing, mouse drag and resize, physical dimensions and wrapping",
+      "result": "pass"
+    },
+    {
+      "name": "desktop background selection updates rendered background",
+      "result": "pass"
+    },
+    {
+      "name": "desktop sticker add, mouse drag, resize, rotation, duplicate and delete",
+      "result": "pass"
+    },
+    {
+      "name": "desktop PNG export downloads a real image",
+      "result": "pass",
+      "evidence": {
+        "width": 975,
+        "height": 1320,
+        "bytes": 1509603
+      }
+    },
+    {
+      "name": "desktop confirmation: no horizontal overflow",
+      "result": "pass",
+      "evidence": {
+        "viewport": 1440,
+        "scroll": 1440
+      }
+    },
+    {
+      "name": "desktop confirmation, PNG, submit form cancel and return preserve design",
+      "result": "pass"
+    },
+    {
+      "name": "desktop cancelling downgrade keeps design and current tier",
+      "result": "pass"
+    },
+    {
+      "name": "desktop confirmed downgrade removes restricted elements and retains uploaded card",
+      "result": "pass"
+    },
+    {
+      "name": "desktop CUSTOM retains upload/text and keeps PREMIUM background locked",
+      "result": "pass"
+    },
+    {
+      "name": "desktop original cloud admin remains behind login; no demo bypass",
+      "result": "pass"
+    },
+    {
+      "name": "mobile home: no horizontal overflow",
+      "result": "pass",
+      "evidence": {
+        "viewport": 390,
+        "scroll": 390
+      }
+    },
+    {
+      "name": "mobile hero swatches update the rendered frame",
+      "result": "pass"
+    },
+    {
+      "name": "mobile inspiration shows three complete frame examples",
+      "result": "pass"
+    },
+    {
+      "name": "mobile tier previews have identical dimensions",
+      "result": "pass",
+      "evidence": [
+        {
+          "w": 159,
+          "h": 215.109375
+        },
+        {
+          "w": 159,
+          "h": 215.109375
+        },
+        {
+          "w": 159,
+          "h": 215.109375
+        }
+      ]
+    },
+    {
+      "name": "mobile tiers: no horizontal overflow",
+      "result": "pass",
+      "evidence": {
+        "viewport": 390,
+        "scroll": 390
+      }
+    },
+    {
+      "name": "mobile five tools fit without horizontal scrolling; one confirm CTA",
+      "result": "pass",
+      "evidence": {
+        "width": 348,
+        "scroll": 348
+      }
+    },
+    {
+      "name": "mobile editor: no horizontal overflow",
+      "result": "pass",
+      "evidence": {
+        "viewport": 390,
+        "scroll": 390
+      }
+    },
+    {
+      "name": "mobile preview/tool anchors keep tools below header",
+      "result": "pass",
+      "evidence": {
+        "y": 189.640625
+      }
+    },
+    {
+      "name": "mobile preset selection and card upload update preview",
+      "result": "pass"
+    },
+    {
+      "name": "mobile unsupported card size blocks confirmation; preset restores valid size",
+      "result": "pass"
+    },
+    {
+      "name": "mobile editor frame swatch updates actual frame fill",
+      "result": "pass"
+    },
+    {
+      "name": "mobile text editing, touch drag and resize, physical dimensions and wrapping",
+      "result": "pass"
+    },
+    {
+      "name": "mobile background selection updates rendered background",
+      "result": "pass"
+    },
+    {
+      "name": "mobile sticker add, touch drag, resize, rotation, duplicate and delete",
+      "result": "pass"
+    },
+    {
+      "name": "mobile PNG export downloads a real image",
+      "result": "pass",
+      "evidence": {
+        "width": 725,
+        "height": 980,
+        "bytes": 911746
+      }
+    },
+    {
+      "name": "mobile confirmation: no horizontal overflow",
+      "result": "pass",
+      "evidence": {
+        "viewport": 390,
+        "scroll": 390
+      }
+    },
+    {
+      "name": "mobile confirmation, PNG, submit form cancel and return preserve design",
+      "result": "pass"
+    },
+    {
+      "name": "mobile cancelling downgrade keeps design and current tier",
+      "result": "pass"
+    },
+    {
+      "name": "mobile confirmed downgrade removes restricted elements and retains uploaded card",
+      "result": "pass"
+    },
+    {
+      "name": "mobile CUSTOM retains upload/text and keeps PREMIUM background locked",
+      "result": "pass"
+    },
+    {
+      "name": "mobile original cloud admin remains behind login; no demo bypass",
+      "result": "pass"
+    },
+    {
+      "name": "isolated local demo submission preserves schema, millimetres, PNG and design code",
+      "result": "pass",
+      "evidence": {
+        "code": "DES-20261101-49996C7A34CE"
+      }
+    },
+    {
+      "name": "isolated demo admin reads submitted local record and opens design details",
+      "result": "pass"
+    },
+    {
+      "name": "home 360px: no horizontal overflow",
+      "result": "pass",
+      "evidence": {
+        "viewport": 360,
+        "scroll": 360
+      }
+    },
+    {
+      "name": "tiers 360px: no horizontal overflow",
+      "result": "pass",
+      "evidence": {
+        "viewport": 360,
+        "scroll": 360
+      }
+    },
+    {
+      "name": "editor 360px: no horizontal overflow",
+      "result": "pass",
+      "evidence": {
+        "viewport": 360,
+        "scroll": 360
+      }
+    },
+    {
+      "name": "home 768px: no horizontal overflow",
+      "result": "pass",
+      "evidence": {
+        "viewport": 768,
+        "scroll": 768
+      }
+    },
+    {
+      "name": "tiers 768px: no horizontal overflow",
+      "result": "pass",
+      "evidence": {
+        "viewport": 768,
+        "scroll": 768
+      }
+    },
+    {
+      "name": "editor 768px: no horizontal overflow",
+      "result": "pass",
+      "evidence": {
+        "viewport": 768,
+        "scroll": 768
+      }
+    },
+    {
+      "name": "home 1024px: no horizontal overflow",
+      "result": "pass",
+      "evidence": {
+        "viewport": 1024,
+        "scroll": 1024
+      }
+    },
+    {
+      "name": "tiers 1024px: no horizontal overflow",
+      "result": "pass",
+      "evidence": {
+        "viewport": 1024,
+        "scroll": 1024
+      }
+    },
+    {
+      "name": "editor 1024px: no horizontal overflow",
+      "result": "pass",
+      "evidence": {
+        "viewport": 1024,
+        "scroll": 1024
+      }
+    },
+    {
+      "name": "no application errors; zero production write attempts",
+      "result": "pass"
+    }
+  ],
+  "cloudRequestsBlocked": [],
+  "errors": []
+}

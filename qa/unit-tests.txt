@@ -1,0 +1,31 @@
+
+> photocard-frame-customizer@0.1.0 test
+> node --test tests/*.test.mjs
+
+✔ empty and placeholder settings keep the explicit local demo mode (3.9135ms)
+✔ accepts the new public key and legacy anon JWT (0.6215ms)
+✔ partial or invalid configuration cannot silently fall back to local storage (0.3624ms)
+✔ privileged credentials cannot create a browser client or appear in errors (0.9844ms)
+✔ production preflight stops before bundling a secret key and redacts it (1467.0051ms)
+✔ all six resize handles keep the opposite edge/corner fixed at 0 degrees (2.0438ms)
+✔ all six resize handles keep the opposite edge/corner fixed at 45 degrees (0.5937ms)
+✔ all six resize handles keep the opposite edge/corner fixed at 90 degrees (0.1463ms)
+✔ all six resize handles keep the opposite edge/corner fixed at -120 degrees (0.0955ms)
+✔ dragging a handle across the fixed edge keeps dimensions positive without flipping (0.1019ms)
+✔ dimensions stay within the physical frame limits (0.2288ms)
+✔ research tiers increase from appearance to text to background and decoration (5.8581ms)
+✔ BASIC accepts an uploaded card and retains frame appearance and physical size (0.733ms)
+✔ CUSTOM accepts an uploaded card and retains frame appearance and physical size (1.6624ms)
+✔ PREMIUM accepts an uploaded card and retains frame appearance and physical size (0.1828ms)
+✔ only downgrades require a warning, including PREMIUM directly to BASIC (8.9158ms)
+✔ downgraded elements cannot reappear on subsequent upgrades (0.3194ms)
+✔ updates from stale background and sticker controls are stripped at restricted tiers (0.3656ms)
+✔ legacy text defaults to single-line layout and both text tiers retain all layout settings (21.2876ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2237.7978

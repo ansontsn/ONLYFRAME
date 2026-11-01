@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import {
-  CustomizerState,
-  CustomizationTier,
-  PlacedSticker
+import React, { useEffect, useState } from 'react';
+import { 
+  CustomizerState, 
+  CustomizationTier, 
+  PlacedSticker 
 } from '../types';
-import {
-  FRAME_COLOR_OPTIONS,
-  BACKGROUND_OPTIONS,
-  STICKER_OPTIONS,
+import { 
+  FRAME_COLOR_OPTIONS, 
+  BACKGROUND_OPTIONS, 
+  STICKER_OPTIONS, 
   FONT_OPTIONS,
   PRESET_PHOTOCARDS
 } from '../data/options';
@@ -15,90 +15,49 @@ import { StickerArtwork } from './StickerArtwork';
 import { TIER_OPTIONS } from '../data/tiers';
 import { MIN_TEXT_BOX_MM } from '../utils/textBox';
 import { CARD_SIZE_PRESETS, FRAME_WIDTH_MM, FRAME_HEIGHT_MM, isCardSizeSupported } from '../utils/dimensions';
-import {
+import { 
+  Palette, 
+  Sparkles, 
+  Type, 
+  Image as ImageIcon, 
+  Lock, 
+  Trash2, 
   ArrowUpRight,
   Copy,
-  HandGrabbing,
-  Image as ImageIcon,
-  Info,
-  LockSimple,
-  Palette,
-  Sparkle,
-  TextT,
-  Trash,
-  UploadSimple,
-  Warning
-} from '@phosphor-icons/react';
-import { focusRing, optionTile } from './ui';
+  RotateCw,
+  Maximize2,
+  SlidersHorizontal,
+  UploadCloud
+} from 'lucide-react';
 
 interface CustomizerToolsProps {
   state: CustomizerState;
   onUpdateState: (updates: Partial<CustomizerState>) => void;
   onUpgradeTier: (tier: CustomizationTier) => void;
+  isTextSelected?: boolean;
+  onSelectText?: () => void;
   selectedStickerId?: string | null;
   onSelectSticker?: (id: string | null) => void;
 }
 
 type TabType = 'color' | 'background' | 'photo' | 'stickers' | 'text';
 
-const inputClass = 'mt-1 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-ink transition-colors duration-300 ease-out placeholder:text-black/30 focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink';
-const rangeClass = 'w-full accent-ink';
-const subLabel = 'text-xs font-semibold uppercase tracking-widest text-black/40';
-
-const PanelHeading: React.FC<{ title: string; hint?: React.ReactNode; aside?: React.ReactNode }> = ({ title, hint, aside }) => (
-  <div>
-    <div className="flex items-center justify-between gap-3">
-      <h3 className="text-base font-semibold text-ink">{title}</h3>
-      {aside && <span className="shrink-0 text-xs text-black/45">{aside}</span>}
-    </div>
-    {hint && <p className="mt-1 text-sm text-black/50">{hint}</p>}
-  </div>
-);
-
-const LockedPanel: React.FC<{ title: string; body: string; cta: string; onUpgrade: () => void }> = ({ title, body, cta, onUpgrade }) => (
-  <div className="rounded-2xl border border-black/10 bg-paper p-6 text-center">
-    <span className="mx-auto grid h-10 w-10 place-items-center rounded-xl bg-white text-ink">
-      <LockSimple weight="bold" className="h-5 w-5" />
-    </span>
-    <h4 className="mt-4 text-sm font-semibold text-ink">{title}</h4>
-    <p className="mt-2 text-sm text-black/55">{body}</p>
-    <button
-      onClick={onUpgrade}
-      className={`group mt-4 inline-flex items-center gap-2 rounded-xl bg-ink px-3 py-2 text-sm font-semibold text-white transition duration-300 ease-out hover:bg-black active:scale-[0.98] ${focusRing}`}
-    >
-      {cta}
-      <ArrowUpRight weight="bold" className="h-4 w-4 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-    </button>
-  </div>
-);
-
-const RangeRow: React.FC<{ label: string; value: string; children: React.ReactNode }> = ({ label, value, children }) => (
-  <div>
-    <div className="mb-1 flex justify-between text-xs">
-      <span className="text-black/55">{label}</span>
-      <span className="font-mono font-semibold text-ink">{value}</span>
-    </div>
-    {children}
-  </div>
-);
-
-const Tip: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <p className="flex items-start gap-2 rounded-xl bg-paper p-3 text-xs text-black/55">
-    <HandGrabbing weight="duotone" className="h-4 w-4 shrink-0 text-ink" />
-    <span>{children}</span>
-  </p>
-);
-
 export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
   state,
   onUpdateState,
   onUpgradeTier,
   selectedStickerId,
+  isTextSelected,
+  onSelectText,
   onSelectSticker
 }) => {
-  const [activeTab, setActiveTab] = useState<TabType>('color');
+  const [activeTab, setActiveTab] = useState<TabType>('photo');
   const [stickerFilter, setStickerFilter] = useState<'all' | 'pearl' | 'pastel'>('all');
-  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (selectedStickerId) setActiveTab('stickers');
+    else if (isTextSelected) setActiveTab('text');
+  }, [selectedStickerId, isTextSelected]);
 
   // Tier guards
   const isBasic = state.tier === 'BASIC';
@@ -175,123 +134,77 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
 
   const activeSticker = state.stickers.find(s => s.id === selectedStickerId) || null;
 
-  const tabs: { id: TabType; label: string; icon: React.ReactNode; locked: boolean }[] = [
-    { id: 'color', label: '框體顏色', icon: <Palette weight="duotone" className="h-4 w-4" />, locked: false },
-    { id: 'photo', label: '小卡模擬預覽', icon: <ImageIcon weight="duotone" className="h-4 w-4" />, locked: false },
-    { id: 'background', label: '主題背景', icon: <Sparkle weight="duotone" className="h-4 w-4" />, locked: !canUseBackgroundAndStickers },
-    { id: 'stickers', label: '裝飾貼飾', icon: <img src="/stickers/pearl/sparkle.png" alt="" className="h-4 w-4 object-contain" />, locked: !canUseBackgroundAndStickers },
-    { id: 'text', label: '客製文字', icon: <TextT weight="duotone" className="h-4 w-4" />, locked: isBasic },
-  ];
-
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-3xl border border-black/5 bg-white">
-      <section className="space-y-3 border-b border-black/5 p-4">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <h3 className="text-sm font-semibold text-ink">我的小卡尺寸</h3>
-            <p className="mt-1 text-xs text-black/45">卡片固定置中，預覽依實際比例呈現</p>
-          </div>
-          <span className="shrink-0 rounded-full bg-paper px-2 py-1 font-mono text-xs text-black/50">框體 85 × 115 mm</span>
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          {CARD_SIZE_PRESETS.map((preset) => (
-            <button
-              key={preset.label}
-              onClick={() => onUpdateState({ cardWidthMm: preset.widthMm, cardHeightMm: preset.heightMm, cardSizePreset: preset.label })}
-              aria-pressed={state.cardSizePreset === preset.label}
-              className={`${optionTile(state.cardSizePreset === preset.label)} px-2 py-2 text-center font-mono text-xs font-medium text-ink`}
-            >
-              {preset.label}
-            </button>
-          ))}
-          <button
-            onClick={() => onUpdateState({ cardSizePreset: 'custom' })}
-            aria-pressed={state.cardSizePreset === 'custom'}
-            className={`${optionTile(state.cardSizePreset === 'custom')} px-2 py-2 text-center text-xs font-medium text-ink`}
-          >
-            自訂尺寸
-          </button>
-        </div>
-        {state.cardSizePreset === 'custom' && <div className="grid grid-cols-2 gap-2">
-          <label className="text-xs text-black/55">寬度 (mm)<input type="number" min={50} max={63} step="0.1" value={state.cardWidthMm} onChange={(e) => onUpdateState({ cardWidthMm: Number(e.target.value) })} className={inputClass} /></label>
-          <label className="text-xs text-black/55">高度 (mm)<input type="number" min={70} max={90} step="0.1" value={state.cardHeightMm} onChange={(e) => onUpdateState({ cardHeightMm: Number(e.target.value) })} className={inputClass} /></label>
-        </div>}
-        {!isCardSizeSupported(state.cardWidthMm, state.cardHeightMm) && (
-          <p role="alert" className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-            <Warning weight="bold" className="h-4 w-4 shrink-0" />
-            此尺寸超出 ONLYFRAME 標準框目前建議支援範圍，可能與磁吸區域或裝飾區重疊。
-          </p>
-        )}
-      </section>
+    <div className="tool-panel flex flex-col bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
 
-      {/* Tab Navigation */}
-      <div role="tablist" aria-label="編輯工具" className="flex flex-wrap items-center gap-1 border-b border-black/5 p-2">
-        {tabs.map((tab) => {
-          const active = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              role="tab"
-              aria-selected={active}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm transition-colors duration-300 ease-out ${focusRing} ${
-                active ? 'bg-ink font-semibold text-white' : 'font-medium text-black/55 hover:bg-black/5 hover:text-ink'
-              }`}
-            >
-              {tab.icon}
-              {tab.label}
-              {tab.locked && <LockSimple weight="bold" className={`h-3 w-3 ${active ? 'text-white/60' : 'text-black/30'}`} aria-label="需升級方案" />}
-            </button>
-          );
-        })}
+      
+      <div className="tool-panel-heading"><span className="eyebrow">MAKE IT YOURS</span><span>{state.tier} 工具</span></div>
+      <div className="tool-tabs" role="tablist" aria-label="設計工具">
+        {([
+          ['photo', '小卡', ImageIcon, false], ['color', '框色', Palette, false],
+          ['text', '文字', Type, isBasic], ['background', '背景', Sparkles, !canUseBackgroundAndStickers],
+          ['stickers', '貼飾', SlidersHorizontal, !canUseBackgroundAndStickers],
+        ] as const).map(([id, label, Icon, locked]) => <button key={id} id={`tab-${id}`} role="tab" aria-selected={activeTab === id} aria-controls={`panel-${id}`} onClick={() => setActiveTab(id)} className={activeTab === id ? 'active' : ''}><Icon size={17} /><span>{label}{locked && <Lock size={10} />}</span></button>)}
       </div>
-
       {/* Tab Panels Content */}
-      <div role="tabpanel" className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
-
+      <div id={`panel-${activeTab}`} role="tabpanel" aria-labelledby={`tab-${activeTab}`} className="tool-content p-4 sm:p-5 space-y-4">
+        
         {/* FRAME COLOR */}
         {activeTab === 'color' && (
-          <div className="space-y-4">
-            <PanelHeading title="框體顏色與透光效果" hint="模擬壓克力的透光質感，襯托小卡主角。" aside="純色、半透、曜黑" />
-
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {FRAME_COLOR_OPTIONS.map((c) => {
-                const isSelected = state.frameColorId === c.id;
-                return (
-                  <button
-                    key={c.id}
-                    onClick={() => onUpdateState({ frameColorId: c.id })}
-                    aria-pressed={isSelected}
-                    className={`${optionTile(isSelected)} flex items-center gap-3 p-3`}
-                  >
-                    <span
-                      className="h-8 w-8 shrink-0 rounded-full border border-black/10"
-                      style={{ background: c.id === 'clear' ? '#ECE9E4' : c.hex }}
-                    />
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium text-ink">{c.name.split(' (')[0]}</span>
-                      <span className="block truncate text-xs text-black/40">{c.name.match(/\((.*)\)/)?.[1] ?? c.id}</span>
-                    </span>
-                  </button>
-                );
-              })}
+          <div className="space-y-3">
+            <div>
+              <h3 className="text-sm font-bold text-ink flex items-center justify-between">
+                <span>選擇框體顏色與透光效果</span>
+                <span className="text-xs text-stone-600 font-normal">純色/半透/曜黑</span>
+              </h3>
+              <p className="text-xs text-stone-600 mt-0.5">
+                切換框色，找到適合收藏的搭配。效果僅供示意。
+              </p>
             </div>
+
+            <p className="selected-color-name" aria-live="polite">{FRAME_COLOR_OPTIONS.find(c => c.id === state.frameColorId)?.name.split(' (')[0]}</p>
+            <div className="frame-swatches">{FRAME_COLOR_OPTIONS.map(c => <button key={c.id} onClick={() => onUpdateState({ frameColorId: c.id })} aria-label={c.name.split(' (')[0]} aria-pressed={state.frameColorId === c.id} title={c.name.split(' (')[0]} className={state.frameColorId === c.id ? 'selected' : ''}><span style={{ background: c.id === 'clear' ? 'linear-gradient(135deg,#fff,#dad7d2)' : c.hex }} /></button>)}</div>
+            <p className="text-xs text-stone-600">點選色票，即時比較框體外觀。</p>
           </div>
         )}
 
-        {/* PHOTOCARD DEMO & UPLOAD */}
+        {/* 3. PHOTOCARD DEMO & UPLOAD */}
         {activeTab === 'photo' && (
-          <div className="space-y-6">
-            <PanelHeading
-              title="小卡裝框效果模擬"
-              aside="純預覽，成品僅含框"
-              hint={<>商品實體為<strong className="font-semibold text-ink">壓克力展示框本體</strong>（不含小卡）。切換示範卡片，看看小卡裝進去的樣子。</>}
-            />
-
-            {/* Demo cards available for ALL TIERS */}
+          <div className="space-y-4">
+      <details className="size-settings">
+<summary>小卡尺寸 · {state.cardWidthMm} × {state.cardHeightMm} mm <span>調整尺寸</span></summary>
+        <div className="flex items-center justify-between gap-2">
+          <div><h3 className="text-sm font-bold text-ink">我的小卡尺寸</h3><p className="text-[11px] text-stone-600 mt-0.5">卡片固定置中，預覽依實際比例呈現</p></div>
+          <span className="text-[11px] text-stone-600 font-mono">框體 85 × 115 mm</span>
+        </div>
+        <div className="grid grid-cols-2 gap-1.5">
+          {CARD_SIZE_PRESETS.map((preset) => <button key={preset.label} onClick={() => onUpdateState({ cardWidthMm: preset.widthMm, cardHeightMm: preset.heightMm, cardSizePreset: preset.label })} className={`px-2 py-1.5 rounded-lg border text-[11px] font-medium transition-colors ${state.cardSizePreset === preset.label ? 'border-pink-400 bg-pink-500/15 text-brand-deep' : 'border-stone-200 bg-stone-50 text-stone-700 hover:border-stone-200/25'}`}>{preset.label}</button>)}
+        </div>
+        <button onClick={() => onUpdateState({ cardSizePreset: 'custom' })} className={`w-full px-2 py-1.5 rounded-lg border text-[11px] text-left ${state.cardSizePreset === 'custom' ? 'border-pink-400 bg-pink-500/15 text-brand-deep' : 'border-stone-200 text-stone-700'}`}>自訂尺寸</button>
+        {state.cardSizePreset === 'custom' && <div className="grid grid-cols-2 gap-2">
+          <label className="text-[11px] text-stone-600">寬度 (mm)<input type="number" min={50} max={63} step="0.1" value={state.cardWidthMm} onChange={(e) => onUpdateState({ cardWidthMm: Number(e.target.value) })} className="mt-1 w-full rounded-lg border border-stone-200 bg-stone-100 px-2 py-1.5 text-xs text-ink" /></label>
+          <label className="text-[11px] text-stone-600">高度 (mm)<input type="number" min={70} max={90} step="0.1" value={state.cardHeightMm} onChange={(e) => onUpdateState({ cardHeightMm: Number(e.target.value) })} className="mt-1 w-full rounded-lg border border-stone-200 bg-stone-100 px-2 py-1.5 text-xs text-ink" /></label>
+        </div>}
+        {!isCardSizeSupported(state.cardWidthMm, state.cardHeightMm) && <p className="text-[11px] leading-relaxed text-amber-800 bg-amber-400/10 border border-amber-300/20 rounded-lg px-2 py-1.5">此尺寸超出 ONLYFRAME 標準框目前建議支援範圍，可能與磁吸區域或裝飾區重疊。</p>}
+      </details>
             <div>
-              <p className={subLabel}>示範小卡</p>
-              <div className="mt-3 grid grid-cols-2 gap-2">
+              <h3 className="text-sm font-bold text-ink flex items-center justify-between">
+                <span>小卡裝框效果模擬</span>
+                <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-stone-100 text-stone-700">
+                  三種方案共用
+                </span>
+              </h3>
+              <p className="text-xs text-stone-600 mt-0.5 leading-relaxed">
+                選擇示範小卡或上傳自己的圖片，看看裝框後的樣子。小卡僅供預覽，本網站為研究原型，非實際販售。
+              </p>
+            </div>
+
+            {/* Section A: Demo cards available for ALL TIERS */}
+            <div className="space-y-2">
+              <span className="text-xs font-semibold text-stone-700 block">
+                選擇示範小卡風格（所有方案皆可試看）：
+              </span>
+              <div className="grid grid-cols-2 gap-2">
                 {PRESET_PHOTOCARDS.map((preset) => {
                   const isSelected = state.photocardUrl === preset.url && !state.isCustomPhoto;
                   return (
@@ -304,14 +217,25 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                           isCustomPhoto: false
                         })
                       }
-                      aria-pressed={isSelected}
-                      className={`${optionTile(isSelected)} flex items-center gap-3 p-2`}
+                      className={`p-2.5 rounded-xl border flex items-center gap-2.5 text-left transition-all ${
+                        isSelected
+                          ? 'border-pink-500 bg-pink-500/10 shadow-md ring-1 ring-pink-500/50'
+                          : 'border-stone-200 bg-stone-50 hover:border-stone-200'
+                      }`}
                     >
-                      <img src={preset.url} alt={preset.name} className="h-12 w-8 shrink-0 rounded object-cover" />
-                      <span className="min-w-0">
-                        <span className="block truncate text-sm font-medium text-ink">{preset.name}</span>
-                        <span className="mt-0.5 block truncate text-xs text-black/40">{(preset as any).desc || '示範小卡'}</span>
-                      </span>
+                      <img
+                        src={preset.url}
+                        alt={preset.name}
+                        className="w-8 h-12 object-cover rounded-md border border-stone-200 flex-shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <span className="text-xs font-bold text-stone-800 block truncate">
+                          {preset.name}
+                        </span>
+                        <span className="text-[11px] text-brand-deep truncate block mt-0.5">
+                          {(preset as any).desc || '示範小卡'}
+                        </span>
+                      </div>
                     </button>
                   );
                 })}
@@ -325,112 +249,152 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                       isCustomPhoto: false
                     })
                   }
-                  aria-pressed={!state.photocardUrl}
-                  className={`${optionTile(!state.photocardUrl)} flex items-center gap-3 p-2`}
+                  className={`p-2.5 rounded-xl border flex items-center gap-2.5 text-left transition-all ${
+                    !state.photocardUrl
+                      ? 'border-pink-500 bg-pink-500/10 shadow-md ring-1 ring-pink-500/50'
+                      : 'border-stone-200 bg-stone-50 hover:border-stone-200'
+                  }`}
                 >
-                  <span className="h-12 w-8 shrink-0 rounded border border-dashed border-black/20" />
-                  <span className="min-w-0">
-                    <span className="block truncate text-sm font-medium text-ink">純透明空框</span>
-                    <span className="mt-0.5 block text-xs text-black/40">不放卡片，看純框</span>
-                  </span>
+                  <div className="w-8 h-12 rounded-md border border-dashed border-stone-200/30 flex items-center justify-center text-slate-500 text-xs flex-shrink-0">
+                    🔲
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-xs font-bold text-stone-800 block truncate">
+                      純透明空框
+                    </span>
+                    <span className="text-[11px] text-stone-600 block mt-0.5">
+                      不放卡片，看純框
+                    </span>
+                  </div>
                 </button>
               </div>
             </div>
 
             {/* Shared photocard preview tool */}
-            <div className="border-t border-black/5 pt-6">
-              <p className={subLabel}>上傳自己的小卡</p>
-              <div className="mt-3">
-                {state.isCustomPhoto && state.photocardUrl ? (
-                  <div className="flex items-center justify-between gap-3 rounded-xl border border-ink p-3">
-                    <div className="flex min-w-0 items-center gap-3">
-                      <img src={state.photocardUrl} alt="已上傳小卡" className="h-14 w-10 shrink-0 rounded object-cover" />
-                      <div className="min-w-0">
-                        <span className="block truncate text-sm font-medium text-ink">{state.photocardName || '自訂小卡'}</span>
-                        <span className="text-xs text-black/45">已套用到展示框</span>
+            <div className="pt-2 border-t border-stone-200">
+              <span className="text-xs font-semibold text-stone-700 block mb-2">
+                上傳自己的小卡圖片（三種方案皆可預覽）：
+              </span>
+
+              <div className="space-y-3">
+                  {state.isCustomPhoto && state.photocardUrl ? (
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-stone-50 border border-pink-500/40">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <img 
+                          src={state.photocardUrl} 
+                          alt="已上傳小卡" 
+                          className="w-10 h-14 object-cover rounded-md border border-stone-200 flex-shrink-0" 
+                        />
+                        <div className="min-w-0">
+                          <span className="text-xs font-bold text-ink block truncate">
+                            {state.photocardName || '自訂小卡'}
+                          </span>
+                          <span className="text-[11px] text-brand font-mono">已成功套用</span>
+                        </div>
                       </div>
+                      <button
+                        onClick={() => onUpdateState({ photocardUrl: '', photocardName: '純空框展示', isCustomPhoto: false })}
+                        className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs flex items-center gap-1 transition-all"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>清除</span>
+                      </button>
                     </div>
-                    <button
-                      onClick={() => onUpdateState({ photocardUrl: '', photocardName: '純空框展示', isCustomPhoto: false })}
-                      className={`inline-flex shrink-0 items-center gap-1 rounded-lg px-2 py-2 text-xs font-semibold text-red-700 transition-colors duration-300 ease-out hover:bg-red-50 ${focusRing}`}
-                    >
-                      <Trash weight="bold" className="h-4 w-4" />
-                      清除
-                    </button>
-                  </div>
-                ) : (
-                  <label className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-black/20 bg-paper p-6 text-center transition-colors duration-300 ease-out hover:border-ink focus-within:border-ink focus-within:ring-1 focus-within:ring-ink`}>
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      className="sr-only"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        if (file.size > 5 * 1024 * 1024) {
-                          setUploadError('上傳失敗：這張圖片超過 5 MB，請壓縮後再上傳。');
-                          e.target.value = '';
-                          return;
-                        }
-                        setUploadError(null);
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                          if (ev.target?.result) {
-                            onUpdateState({
-                              photocardUrl: ev.target.result as string,
-                              photocardName: file.name,
-                              isCustomPhoto: true
-                            });
+                  ) : (
+                    <label className="border-2 border-dashed border-stone-200 hover:border-pink-400/50 rounded-2xl p-5 text-center flex flex-col items-center justify-center gap-2 cursor-pointer bg-stone-50 hover:bg-pink-500/5 transition-all">
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          if (file.size > 5 * 1024 * 1024) {
+                            alert('單張小卡圖片最多 5 MB，請壓縮後再上傳。');
+                            e.target.value = '';
+                            return;
                           }
-                        };
-                        reader.readAsDataURL(file);
-                      }}
-                    />
-                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-white text-ink">
-                      <UploadSimple weight="bold" className="h-5 w-5" />
-                    </span>
-                    <span>
-                      <span className="block text-sm font-semibold text-ink">選擇小卡圖片</span>
-                      <span className="mt-1 block text-xs text-black/45">PNG、JPG、WEBP，每張最多 5 MB</span>
-                    </span>
-                  </label>
-                )}
-                {uploadError && <p role="alert" className="mt-2 text-xs font-medium text-red-700">{uploadError}</p>}
+                          const reader = new FileReader();
+                          reader.onload = (ev) => {
+                            if (ev.target?.result) {
+                              onUpdateState({
+                                photocardUrl: ev.target.result as string,
+                                photocardName: file.name,
+                                isCustomPhoto: true
+                              });
+                            }
+                          };
+                          reader.readAsDataURL(file);
+                        }}
+                      />
+                      <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-brand">
+                        <UploadCloud className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-semibold text-stone-800 block">點擊上傳個人小卡圖片</span>
+                        <span className="text-[11px] text-slate-500 block mt-0.5">支援 PNG, JPG, WEBP；每張最多 5 MB（1:1 裝框模擬）</span>
+                      </div>
+                    </label>
+                  )}
               </div>
             </div>
 
-            <p className="flex items-start gap-2 text-xs text-black/40">
-              <Info weight="bold" className="mt-0.5 h-4 w-4 shrink-0" />
-              上傳圖片僅用於小卡裝框的即時預覽；網站為畢業專題研究原型。
-            </p>
+            <div className="p-2.5 rounded-xl bg-stone-50 border border-stone-200 text-[11px] text-stone-600 flex items-start gap-1.5">
+              <span className="text-amber-400">⚠️</span>
+              <span>上傳圖片僅用於小卡裝框的即時預覽；網站為畢業專題研究 Prototype。</span>
+            </div>
+
           </div>
         )}
 
-        {/* BACKGROUND SELECTION */}
+        {/* 4. BACKGROUND SELECTION */}
         {activeTab === 'background' && (
-          <div className="space-y-4">
-            <PanelHeading title="展示框背景樣式" hint="襯托小卡的主題背景：純色、漸層、雷射 Y2K 與星空。" />
+          <div className="space-y-3">
+            <div>
+              <h3 className="text-sm font-bold text-ink">展示框背景樣式</h3>
+              <p className="text-xs text-stone-600 mt-0.5">
+                襯托小卡的主題背景（純色、漸層、雷射 Y2K、星塵星空）
+              </p>
+            </div>
 
             {!canUseBackgroundAndStickers ? (
-              <LockedPanel
-                title="PREMIUM 自由客製方案可使用主題背景"
-                body="PREMIUM 方案可使用背景與裝飾，包含所有純色、漸層與主題效果。"
-                cta="切換至 PREMIUM 自由客製"
-                onUpgrade={() => onUpgradeTier('PREMIUM')}
-              />
+              <div className="p-4 rounded-xl bg-pink-500/10 border border-pink-500/30 text-center space-y-2">
+                <Lock className="w-6 h-6 text-brand mx-auto" />
+                <h4 className="text-xs font-bold text-brand-deep">PREMIUM 自由客製方案可使用主題背景</h4>
+                <p className="text-xs text-stone-700 leading-relaxed">
+                  PREMIUM 方案可使用背景與裝飾，包含所有既有純色、漸層與主題效果。
+                </p>
+                <button
+                  onClick={() => onUpgradeTier('PREMIUM')}
+                  className="mt-2 inline-flex items-center gap-1 px-4 py-1.5 rounded-lg text-xs font-semibold bg-brand hover:bg-brand-deep text-white shadow-md transition-all"
+                >
+                  切換至 PREMIUM 自由客製
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2.5">
                 {BACKGROUND_OPTIONS.map((bg) => {
                   const isSelected = state.backgroundId === bg.id;
                   return (
                     <button
                       key={bg.id}
                       onClick={() => onUpdateState({ backgroundId: bg.id })}
-                      aria-pressed={isSelected}
-                      className={`${optionTile(isSelected)} p-2`}
+                      className={`p-3 rounded-xl border text-left transition-all ${
+                        isSelected
+                          ? 'border-pink-500 bg-pink-500/10 shadow-md'
+                          : 'border-stone-200 bg-stone-50 hover:border-stone-200'
+                      }`}
                     >
-                      <div className={`h-12 w-full rounded-lg border border-black/5 ${bg.id === 'bg-transparent' ? 'bg-paper' : ''} ${bg.cssClass}`} />
-                      <span className="mt-2 block truncate px-1 pb-1 text-sm font-medium text-ink">{bg.name}</span>
+                      <div className={`w-full h-12 rounded-lg border border-stone-200 mb-2 ${bg.cssClass}`} />
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-stone-800 block truncate">
+                          {bg.name}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-brand mt-0.5 block">
+                        PREMIUM 主題背景
+                      </span>
                     </button>
                   );
                 })}
@@ -439,23 +403,41 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
           </div>
         )}
 
-        {/* DECORATIONS / STICKERS */}
+        {/* 5. DECORATIONS / STICKERS */}
         {activeTab === 'stickers' && (
           <div className="space-y-4">
-            <PanelHeading title="加入原創裝飾貼飾" hint="兩套原創圖案，可調整大小、角度與位置。" aside={`已加入 ${state.stickers.length} 枚`} />
+            <div>
+              <h3 className="text-sm font-bold text-ink flex items-center justify-between">
+                <span>加入原創裝飾貼飾</span>
+                <span className="text-xs text-stone-600 font-normal">
+                  已加入: {state.stickers.length} 枚
+                </span>
+              </h3>
+              <p className="text-xs text-stone-600 mt-0.5">
+                從兩套原創圖案挑選，可調整大小、旋轉角度與位置
+              </p>
+            </div>
 
             {!canUseBackgroundAndStickers ? (
-              <LockedPanel
-                title="PREMIUM 自由客製方案可使用自由裝飾"
-                body="PREMIUM 方案可使用背景與裝飾，自由調整多個貼飾的位置、大小與旋轉。"
-                cta="切換至 PREMIUM 自由客製"
-                onUpgrade={() => onUpgradeTier('PREMIUM')}
-              />
+              <div className="p-4 rounded-xl bg-pink-500/10 border border-pink-500/30 text-center space-y-2">
+                <Lock className="w-6 h-6 text-brand mx-auto" />
+                <h4 className="text-xs font-bold text-brand-deep">PREMIUM 自由客製方案可使用自由裝飾</h4>
+                <p className="text-xs text-stone-700 leading-relaxed">
+                  PREMIUM 方案可使用背景與裝飾，自由調整多個貼飾的位置、大小與旋轉。
+                </p>
+                <button
+                  onClick={() => onUpgradeTier('PREMIUM')}
+                  className="mt-2 inline-flex items-center gap-1 px-4 py-1.5 rounded-lg text-xs font-semibold bg-brand hover:bg-brand-deep text-white shadow-md transition-all"
+                >
+                  切換至 PREMIUM 自由客製
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             ) : (
               <div className="space-y-4">
-
+                
                 {/* Sticker Category Filter */}
-                <div className="inline-flex rounded-xl bg-paper p-1" role="group" aria-label="貼飾系列">
+                <div className="flex items-center gap-1 overflow-x-auto pb-1 text-[11px]">
                   {[
                     { id: 'all', label: '全部款式' },
                     { id: 'pearl', label: '珠光夢境' },
@@ -464,9 +446,10 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                     <button
                       key={cat.id}
                       onClick={() => setStickerFilter(cat.id as typeof stickerFilter)}
-                      aria-pressed={stickerFilter === cat.id}
-                      className={`whitespace-nowrap rounded-lg px-3 py-1 text-xs transition-colors duration-300 ease-out ${focusRing} ${
-                        stickerFilter === cat.id ? 'bg-white font-semibold text-ink shadow-sm' : 'font-medium text-black/50 hover:text-ink'
+                      className={`px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap font-medium ${
+                        stickerFilter === cat.id
+                          ? 'bg-brand text-white font-bold'
+                          : 'bg-stone-100 text-stone-600 hover:bg-stone-100 hover:text-ink'
                       }`}
                     >
                       {cat.label}
@@ -476,19 +459,24 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
 
                 {/* Sticker picker grid */}
                 <div>
-                  <p className="mb-2 text-xs text-black/45">點一下即可放進展示框</p>
-                  <div className="grid max-h-40 grid-cols-6 gap-2 overflow-y-auto rounded-xl bg-paper p-2">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-semibold text-stone-700">
+                      點擊即可置入展示框：
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-5 gap-2 max-h-40 overflow-y-auto p-1.5 bg-stone-100 rounded-xl border border-stone-200">
                     {STICKER_OPTIONS
                       .filter((stk) => stickerFilter === 'all' || stk.collection === stickerFilter)
                       .map((stk) => (
                         <button
                           key={stk.id}
                           onClick={() => handleAddSticker(stk.id)}
-                          className={`group flex h-12 select-none items-center justify-center rounded-lg border border-transparent bg-white transition duration-300 ease-out hover:border-black/15 active:scale-95 ${focusRing}`}
-                          title={`${stk.name}：點擊置入`}
+                          className="h-11 rounded-xl border border-stone-200 bg-stone-50 hover:border-pink-400 hover:bg-pink-500/20 flex items-center justify-center transition-all active:scale-90 group select-none"
+                          title={`${stk.name} - 點擊置入`}
                           aria-label={`加入${stk.name}`}
                         >
-                          <StickerArtwork stickerId={stk.id} className="h-8 w-8 transition-transform duration-300 ease-out group-hover:scale-110" />
+                          <StickerArtwork stickerId={stk.id} className="w-9 h-9 group-hover:scale-110 transition-transform" />
                         </button>
                       ))}
                   </div>
@@ -496,16 +484,18 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
 
                 {/* ACTIVE STICKER INSPECTOR (When a sticker is selected) */}
                 {activeSticker ? (
-                  <div className="space-y-4 rounded-2xl border border-ink p-4">
-                    <div className="flex items-center justify-between gap-3 border-b border-black/5 pb-3">
-                      <div className="flex items-center gap-3">
-                        <span className="grid h-10 w-10 place-items-center rounded-lg bg-paper p-1">
-                          <StickerArtwork stickerId={activeSticker.stickerId} fallback={activeSticker.symbol} className="h-full w-full" />
+                  <div className="p-3.5 rounded-2xl bg-brand-soft/50 border border-pink-500/40 space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-pink-500/20">
+                      <div className="flex items-center gap-2">
+                        <span className="p-1 bg-stone-100 rounded-lg border border-pink-500/30 flex items-center justify-center w-[38px] h-[38px]">
+                          <StickerArtwork stickerId={activeSticker.stickerId} fallback={activeSticker.symbol} className="w-full h-full" />
                         </span>
                         <div>
-                          <span className="block text-sm font-semibold text-ink">選取中的貼飾</span>
-                          <span className="font-mono text-xs text-black/45">
-                            {activeSticker.widthMm.toFixed(1)}mm · {activeSticker.rotation}°
+                          <span className="text-xs font-bold text-ink block">
+                            自訂選中貼飾
+                          </span>
+                          <span className="text-[11px] text-brand font-mono">
+                            大小 {activeSticker.widthMm.toFixed(1)}mm ‧ 角度 {activeSticker.rotation}°
                           </span>
                         </div>
                       </div>
@@ -513,24 +503,30 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handleDuplicateSticker(activeSticker.id)}
-                          className={`grid h-8 w-8 place-items-center rounded-lg text-black/60 transition-colors duration-300 ease-out hover:bg-black/5 hover:text-ink ${focusRing}`}
+                          className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs flex items-center gap-1"
                           title="複製此貼飾"
-                          aria-label="複製此貼飾"
                         >
-                          <Copy weight="bold" className="h-4 w-4" />
+                          <Copy className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleRemoveSticker(activeSticker.id)}
-                          className={`grid h-8 w-8 place-items-center rounded-lg text-red-700 transition-colors duration-300 ease-out hover:bg-red-50 ${focusRing}`}
+                          className="p-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-700 text-xs flex items-center gap-1"
                           title="刪除此貼飾"
-                          aria-label="刪除此貼飾"
                         >
-                          <Trash weight="bold" className="h-4 w-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
 
-                    <RangeRow label="大小" value={`${activeSticker.widthMm.toFixed(1)} mm`}>
+                    {/* Size Slider */}
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-stone-700 flex items-center gap-1">
+                          <Maximize2 className="w-3 h-3 text-brand" />
+                          自訂大小
+                        </span>
+                        <span className="font-mono text-brand-deep font-bold">{activeSticker.widthMm.toFixed(1)} mm</span>
+                      </div>
                       <input
                         type="range"
                         aria-label="貼飾大小"
@@ -539,38 +535,54 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                         step={0.5}
                         value={activeSticker.widthMm}
                         onChange={(e) => handleUpdateActiveSticker({ widthMm: Number(e.target.value), heightMm: Number(e.target.value) })}
-                        className={rangeClass}
+                        className="w-full accent-pink-500"
                       />
-                    </RangeRow>
+                    </div>
 
-                    <RangeRow label="旋轉角度" value={`${activeSticker.rotation}°`}>
+                    {/* Rotation Slider & Quick Buttons */}
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-stone-700 flex items-center gap-1">
+                          <RotateCw className="w-3 h-3 text-brand" />
+                          旋轉角度
+                        </span>
+                        <span className="font-mono text-brand-deep font-bold">{activeSticker.rotation}°</span>
+                      </div>
                       <input
                         type="range"
-                        aria-label="貼飾旋轉角度"
+                        aria-label="貼飾旋轉"
                         min={-180}
                         max={180}
                         value={activeSticker.rotation}
                         onChange={(e) => handleUpdateActiveSticker({ rotation: Number(e.target.value) })}
-                        className={rangeClass}
+                        className="w-full accent-pink-500"
                       />
-                      <div className="mt-2 grid grid-cols-6 gap-1">
+                      <div className="flex items-center justify-between gap-1 pt-1.5">
                         {[-90, -45, 0, 45, 90, 180].map((deg) => (
                           <button
                             key={deg}
                             onClick={() => handleUpdateActiveSticker({ rotation: deg })}
-                            aria-pressed={activeSticker.rotation === deg}
-                            className={`rounded-md py-1 font-mono text-xs transition-colors duration-300 ease-out ${focusRing} ${
-                              activeSticker.rotation === deg ? 'bg-ink font-semibold text-white' : 'bg-paper text-black/55 hover:text-ink'
+                            className={`px-2 py-0.5 rounded text-[11px] font-mono transition-colors ${
+                              activeSticker.rotation === deg
+                                ? 'bg-brand text-white font-bold'
+                                : 'bg-stone-100 text-stone-600 hover:bg-stone-100'
                             }`}
                           >
                             {deg > 0 ? `+${deg}°` : `${deg}°`}
                           </button>
                         ))}
                       </div>
-                    </RangeRow>
+                    </div>
 
-                    <div className="grid grid-cols-2 gap-3 border-t border-black/5 pt-3">
-                      <RangeRow label="水平 X" value={`${activeSticker.xMm.toFixed(1)} mm`}>
+                    <p className="text-[11px] text-stone-600">圖案保留原創配色，可自由調整大小、角度與位置。</p>
+
+                    {/* Precise Coordinate Controls */}
+                    <div className="grid grid-cols-2 gap-3 pt-1 border-t border-stone-200 text-[11px]">
+                      <div>
+                        <div className="flex justify-between text-stone-600 mb-0.5">
+                          <span>水平 X</span>
+                          <span className="font-mono text-stone-800">{activeSticker.xMm.toFixed(1)} mm</span>
+                        </div>
                         <input
                           type="range"
                           aria-label="貼飾水平位置"
@@ -579,10 +591,14 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                           step={0.5}
                           value={activeSticker.xMm}
                           onChange={(e) => handleUpdateActiveSticker({ xMm: Number(e.target.value), anchorTarget: 'frame', anchorPosition: undefined })}
-                          className={rangeClass}
+                          className="w-full accent-pink-500"
                         />
-                      </RangeRow>
-                      <RangeRow label="垂直 Y" value={`${activeSticker.yMm.toFixed(1)} mm`}>
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-stone-600 mb-0.5">
+                          <span>垂直 Y</span>
+                          <span className="font-mono text-stone-800">{activeSticker.yMm.toFixed(1)} mm</span>
+                        </div>
                         <input
                           type="range"
                           aria-label="貼飾垂直位置"
@@ -591,50 +607,49 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                           step={0.5}
                           value={activeSticker.yMm}
                           onChange={(e) => handleUpdateActiveSticker({ yMm: Number(e.target.value), anchorTarget: 'frame', anchorPosition: undefined })}
-                          className={rangeClass}
+                          className="w-full accent-pink-500"
                         />
-                      </RangeRow>
+                      </div>
                     </div>
 
-                    <p className="text-xs text-black/40">圖案保留原創配色，可自由調整大小、角度與位置。</p>
                   </div>
                 ) : (
-                  <p className="rounded-xl border border-dashed border-black/15 p-4 text-center text-sm text-black/50">
-                    點選已加入的貼飾，或直接在展示框上點擊，就能調整大小、旋轉與位置。
-                  </p>
+                  <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 text-center text-xs text-stone-600">
+                    點選下方任一已加入的貼飾（或在中央展示框直接點擊），即可調整<strong>大小、旋轉與位置</strong>。
+                  </div>
                 )}
 
                 {/* Active Stickers Chips List */}
                 {state.stickers.length > 0 && (
-                  <div className="border-t border-black/5 pt-4">
-                    <p className={subLabel}>已加入的裝飾</p>
-                    <div className="mt-3 flex flex-wrap gap-2">
+                  <div className="space-y-2 pt-1 border-t border-stone-200">
+                    <span className="text-xs font-semibold text-stone-600 block">
+                      已加入的裝飾清單 (點擊選取編輯):
+                    </span>
+                    <div className="flex flex-wrap gap-2">
                       {state.stickers.map((stk, idx) => {
                         const isSelected = selectedStickerId === stk.id;
                         return (
                           <div
                             key={stk.id}
-                            className={`flex items-center rounded-xl border transition-colors duration-300 ease-out ${
-                              isSelected ? 'border-ink bg-white ring-1 ring-ink' : 'border-black/10 bg-white hover:border-black/25'
+                            onClick={() => onSelectSticker?.(stk.id)}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs cursor-pointer transition-all ${
+                              isSelected
+                                ? 'bg-pink-500/20 border-pink-400 text-brand-deep shadow-md ring-1 ring-pink-400'
+                                : 'bg-stone-100 border-stone-200 text-stone-700 hover:bg-stone-100 hover:border-stone-200'
                             }`}
                           >
+                            <span className="w-5 h-5 flex items-center justify-center">
+                              <StickerArtwork stickerId={stk.stickerId} fallback={stk.symbol} className="w-full h-full" />
+                            </span>
+                            <span className="text-[11px] text-stone-600 font-mono">#{idx + 1}</span>
                             <button
-                              onClick={() => onSelectSticker?.(stk.id)}
-                              aria-pressed={isSelected}
-                              aria-label={`選取第 ${idx + 1} 個貼飾`}
-                              className={`flex items-center gap-2 rounded-l-xl py-1 pl-2 pr-1 ${focusRing}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveSticker(stk.id);
+                              }}
+                              className="text-stone-600 hover:text-rose-400 ml-1 p-0.5"
                             >
-                              <span className="flex h-6 w-6 items-center justify-center">
-                                <StickerArtwork stickerId={stk.stickerId} fallback={stk.symbol} className="h-full w-full" />
-                              </span>
-                              <span className="font-mono text-xs text-black/45">#{idx + 1}</span>
-                            </button>
-                            <button
-                              onClick={() => handleRemoveSticker(stk.id)}
-                              aria-label={`刪除第 ${idx + 1} 個貼飾`}
-                              className={`mr-1 grid h-6 w-6 place-items-center rounded-lg text-black/35 transition-colors duration-300 ease-out hover:bg-red-50 hover:text-red-700 ${focusRing}`}
-                            >
-                              <Trash weight="bold" className="h-3 w-3" />
+                              <Trash2 className="w-3 h-3" />
                             </button>
                           </div>
                         );
@@ -643,29 +658,46 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                   </div>
                 )}
 
-                <Tip>在中央展示框上直接按住貼飾，就能拖曳到想要的位置。</Tip>
+                <p className="text-[11px] text-emerald-800 bg-emerald-500/10 border border-emerald-500/20 p-2 rounded-lg leading-relaxed">
+                  💡 <strong>直覺互動提示</strong>：在中央壓克力展示框上，直接按住貼飾即可任意拖曳移動擺放位置！
+                </p>
 
               </div>
             )}
           </div>
         )}
 
-        {/* CUSTOM TEXT */}
+        {/* 6. CUSTOM TEXT */}
         {activeTab === 'text' && (
-          <div className="space-y-6">
-            <PanelHeading title="客製刻字與應援金句" hint="本命姓名、出道紀念日、名台詞，或任何想展示的一句話。" />
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-bold text-ink">加入你的專屬文字</h3>
+              <p className="text-xs text-stone-600 mt-0.5">
+                輸入姓名、紀念日或一句喜歡的話，點選文字後調整細節。
+              </p>
+            </div>
 
             {isBasic ? (
-              <LockedPanel
-                title="CUSTOM 方案以上可使用文字"
-                body="CUSTOM 文字客製與 PREMIUM 自由客製可編輯內容、字體與文字位置。"
-                cta="切換至 CUSTOM 文字客製"
-                onUpgrade={() => onUpgradeTier('CUSTOM')}
-              />
+              <div className="p-4 rounded-xl bg-pink-500/10 border border-pink-500/30 text-center space-y-2">
+                <Lock className="w-6 h-6 text-brand mx-auto" />
+                <h4 className="text-xs font-bold text-brand-deep">CUSTOM 方案以上可使用文字</h4>
+                <p className="text-xs text-stone-700 leading-relaxed">
+                  CUSTOM 文字客製與 PREMIUM 自由客製可編輯內容、字體與文字位置。
+                </p>
+                <button
+                  onClick={() => onUpgradeTier('CUSTOM')}
+                  className="mt-2 inline-flex items-center gap-1 px-4 py-1.5 rounded-lg text-xs font-semibold bg-brand hover:bg-brand-deep text-white shadow-md transition-all"
+                >
+                  切換至 CUSTOM 文字客製
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             ) : (
-              <div className="space-y-6">
-                <label className="block text-sm font-medium text-ink">
-                  文字內容
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-stone-700 block mb-1">
+                    輸入文字內容：
+                  </label>
                   <input
                     type="text"
                     aria-label="文字內容"
@@ -675,106 +707,87 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                         text: { ...state.text, content: e.target.value }
                       })
                     }
-                    placeholder="例：LOVE WONYOUNG 2026.09.20"
+                    placeholder="例：MY FAVORITE, 2026.11.01"
                     maxLength={30}
-                    className={inputClass}
+                    className="w-full px-3 py-2 rounded-xl bg-stone-50 border border-stone-200 text-sm text-ink placeholder:text-slate-600 focus:outline-none focus:border-pink-500"
                   />
-                  <span className="mt-1 block text-right font-mono text-xs font-normal text-black/35">{state.text.content.length}/30</span>
-                </label>
-
-                {/* Font Choices */}
-                <div>
-                  <p className={subLabel}>字型</p>
-                  <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    {FONT_OPTIONS.map((f) => {
-                      const isSelected = state.text.font === f.id;
-                      return (
-                        <button
-                          key={f.id}
-                          onClick={() =>
-                            onUpdateState({
-                              text: { ...state.text, font: f.id, isSpecialFont: f.isSpecial }
-                            })
-                          }
-                          aria-pressed={isSelected}
-                          className={`${optionTile(isSelected)} p-3`}
-                        >
-                          <span className="block text-sm font-medium text-ink" style={{ fontFamily: f.id }}>{f.name}</span>
-                          <span className="mt-0.5 block text-xs text-black/40">{f.isSpecial ? '特殊設計字體' : '基本字體'}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
                 </div>
 
-                {/* Text Color Swatches */}
+                {state.text.content && !isTextSelected && <button className="btn-secondary w-full" onClick={onSelectText}>選取文字，調整細節</button>}
+                {state.text.content && isTextSelected && <>
+                <div className="p-3 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
+                  <span className="text-xs font-bold text-ink block">文字框尺寸</span>
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="text-[11px] text-stone-700">
+                      文字框寬度 (mm)
+                      <input type="number" aria-label="文字框寬度" min={MIN_TEXT_BOX_MM} max={FRAME_WIDTH_MM} step={0.5} value={Number(state.text.widthMm.toFixed(1))}
+                        onChange={e => { if (e.target.value) onUpdateState({ text: { ...state.text, widthMm: Math.max(MIN_TEXT_BOX_MM, Math.min(FRAME_WIDTH_MM, Number(e.target.value))) } }); }}
+                        className="mt-1 w-full px-2 py-1.5 rounded-lg bg-stone-100 border border-stone-200 text-xs text-ink" />
+                    </label>
+                    <label className="text-[11px] text-stone-700">
+                      文字框高度 (mm)
+                      <input type="number" aria-label="文字框高度" min={MIN_TEXT_BOX_MM} max={FRAME_HEIGHT_MM} step={0.5} value={Number(state.text.heightMm.toFixed(1))}
+                        onChange={e => { if (e.target.value) onUpdateState({ text: { ...state.text, heightMm: Math.max(MIN_TEXT_BOX_MM, Math.min(FRAME_HEIGHT_MM, Number(e.target.value))) } }); }}
+                        className="mt-1 w-full px-2 py-1.5 rounded-lg bg-stone-100 border border-stone-200 text-xs text-ink" />
+                    </label>
+                  </div>
+                  <label className="flex items-center justify-between gap-3 text-xs font-semibold text-stone-800">
+                    <span>自動換行</span>
+                    <input type="checkbox" role="switch" aria-label="自動換行" checked={state.text.autoWrap ?? false}
+                      onChange={e => onUpdateState({ text: { ...state.text, autoWrap: e.target.checked } })}
+                      className="h-4 w-4 accent-pink-500" />
+                  </label>
+                  <p className="text-[11px] text-stone-600 leading-relaxed">
+                    {state.text.autoWrap ? '已開啟：文字依框寬自動換行。' : '單行模式：文字不因框寬不足而換行。'}
+                    選取中央文字框後，可拖曳左右或四角控制點調整尺寸；框尺寸與字體大小分開控制。
+                  </p>
+                </div>
+
+                {/* 2 Quick Position Presets */}
                 <div>
-                  <p className={subLabel}>文字顏色</p>
-                  <div className="mt-3 flex items-center gap-3" role="radiogroup" aria-label="文字顏色">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-stone-700 block">
+                      常用文字位置：
+                    </label>
+                    <span className="text-[11px] text-brand">亦可在展示框直接拖曳</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
                     {[
-                      { hex: '#ffffff', name: '純白' },
-                      { hex: '#12141a', name: '曜石黑' },
-                      { hex: '#fda4af', name: '櫻粉' },
-                      { hex: '#fcd34d', name: '香檳金' },
-                      { hex: '#67e8f9', name: '冰川藍' },
-                      { hex: '#c084fc', name: '電馭紫' }
-                    ].map((c) => (
+                      { label: '底部中央', xMm: 42.5, yMm: 98.9, rot: 0 },
+                      { label: '框體頂部', xMm: 42.5, yMm: 13.8, rot: 0 }
+                    ].map((pos, idx) => (
                       <button
-                        key={c.hex}
-                        role="radio"
-                        aria-checked={state.text.color === c.hex}
-                        aria-label={c.name}
+                        key={idx}
                         onClick={() =>
                           onUpdateState({
-                            text: { ...state.text, color: c.hex }
+                            text: { ...state.text, xMm: pos.xMm, yMm: pos.yMm, rotation: pos.rot, anchorTarget: 'frame', anchorPosition: undefined }
                           })
                         }
-                        className={`h-8 w-8 rounded-full border border-black/15 transition-transform duration-300 ease-out ${focusRing} ${
-                          state.text.color === c.hex ? 'ring-2 ring-ink ring-offset-2' : 'hover:scale-110'
+                        className={`px-3 py-2 rounded-xl border text-xs font-medium transition-all text-center ${
+                          state.text.xMm === pos.xMm && state.text.yMm === pos.yMm
+                            ? 'bg-pink-500/20 border-pink-400 text-brand-deep font-bold'
+                            : 'bg-stone-50 hover:bg-pink-500/10 border-stone-200 hover:border-pink-400/40 text-stone-700'
                         }`}
-                        style={{ background: c.hex }}
-                        title={c.name}
-                      />
+                      >
+                        {pos.label}
+                      </button>
                     ))}
                   </div>
                 </div>
 
-                {/* Quick Position Presets */}
-                <div>
-                  <div className="flex items-center justify-between">
-                    <p className={subLabel}>常用位置</p>
-                    <span className="text-xs text-black/40">也可以在展示框直接拖曳</span>
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    {[
-                      { label: '底部中央銘牌', note: '推薦', xMm: 42.5, yMm: 98.9, rot: 0 },
-                      { label: '框體頂部抬頭', note: '', xMm: 42.5, yMm: 13.8, rot: 0 }
-                    ].map((pos) => {
-                      const isSelected = state.text.xMm === pos.xMm && state.text.yMm === pos.yMm;
-                      return (
-                        <button
-                          key={pos.label}
-                          onClick={() =>
-                            onUpdateState({
-                              text: { ...state.text, xMm: pos.xMm, yMm: pos.yMm, rotation: pos.rot, anchorTarget: 'frame', anchorPosition: undefined }
-                            })
-                          }
-                          aria-pressed={isSelected}
-                          className={`${optionTile(isSelected)} flex items-center justify-between gap-2 px-3 py-2 text-sm font-medium text-ink`}
-                        >
-                          {pos.label}
-                          {pos.note && <span className="rounded-full bg-brand-soft px-2 text-xs font-semibold text-brand-deep">{pos.note}</span>}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
                 {/* Exact Position Sliders */}
-                <div className="space-y-4 rounded-2xl bg-paper p-4">
-                  <p className={subLabel}>精確調整</p>
-                  <div className="grid grid-cols-2 gap-4">
-                    <RangeRow label="水平 X" value={`${state.text.xMm.toFixed(1)} mm`}>
+                <div className="p-3 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
+                  <span className="text-xs font-bold text-ink flex items-center gap-1.5">
+                    <SlidersHorizontal className="w-3.5 h-3.5 text-brand" />
+                    自訂文字精確座標與角度
+                  </span>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <div className="flex justify-between text-[11px] text-stone-700 mb-0.5">
+                        <span>水平 X 座標</span>
+                        <span className="font-mono text-brand-deep font-bold">{state.text.xMm.toFixed(1)} mm</span>
+                      </div>
                       <input
                         type="range"
                         aria-label="文字水平位置"
@@ -787,10 +800,15 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                             text: { ...state.text, xMm: Number(e.target.value), anchorTarget: 'frame', anchorPosition: undefined }
                           })
                         }
-                        className={rangeClass}
+                        className="w-full accent-pink-500"
                       />
-                    </RangeRow>
-                    <RangeRow label="垂直 Y" value={`${state.text.yMm.toFixed(1)} mm`}>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-[11px] text-stone-700 mb-0.5">
+                        <span>垂直 Y 座標</span>
+                        <span className="font-mono text-brand-deep font-bold">{state.text.yMm.toFixed(1)} mm</span>
+                      </div>
                       <input
                         type="range"
                         aria-label="文字垂直位置"
@@ -803,10 +821,17 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                             text: { ...state.text, yMm: Number(e.target.value), anchorTarget: 'frame', anchorPosition: undefined }
                           })
                         }
-                        className={rangeClass}
+                        className="w-full accent-pink-500"
                       />
-                    </RangeRow>
-                    <RangeRow label="字體大小" value={`${state.text.fontSizeMm.toFixed(1)} mm`}>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 pt-1">
+                    <div>
+                      <div className="flex justify-between text-[11px] text-stone-700 mb-0.5">
+                        <span>字體大小</span>
+                        <span className="font-mono text-brand-deep font-bold">{state.text.fontSizeMm.toFixed(1)} mm</span>
+                      </div>
                       <input
                         type="range"
                         aria-label="字體大小"
@@ -819,10 +844,15 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                             text: { ...state.text, fontSizeMm: Number(e.target.value) }
                           })
                         }
-                        className={rangeClass}
+                        className="w-full accent-pink-500"
                       />
-                    </RangeRow>
-                    <RangeRow label="旋轉" value={`${state.text.rotation}°`}>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-[11px] text-stone-700 mb-0.5">
+                        <span>旋轉文字</span>
+                        <span className="font-mono text-brand-deep font-bold">{state.text.rotation}°</span>
+                      </div>
                       <input
                         type="range"
                         aria-label="旋轉文字"
@@ -834,49 +864,93 @@ export const CustomizerTools: React.FC<CustomizerToolsProps> = ({
                             text: { ...state.text, rotation: Number(e.target.value) }
                           })
                         }
-                        className={rangeClass}
+                        className="w-full accent-pink-500"
                       />
-                    </RangeRow>
+                    </div>
                   </div>
-                  <RangeRow label="字距" value={`${(state.text.letterSpacingMm ?? 0.45).toFixed(2)} mm`}>
+                  <div>
+                    <div className="flex justify-between text-[11px] text-stone-700 mb-0.5">
+                      <span>字距</span>
+                      <span className="font-mono text-brand-deep font-bold">{(state.text.letterSpacingMm ?? 0.45).toFixed(2)} mm</span>
+                    </div>
                     <input type="range" aria-label="字距" min={0} max={3} step={0.05} value={state.text.letterSpacingMm ?? 0.45}
                       onChange={e => onUpdateState({ text: { ...state.text, letterSpacingMm: Number(e.target.value) } })}
-                      className={rangeClass} />
-                  </RangeRow>
-                </div>
-
-                {/* Text box size */}
-                <div className="space-y-3 rounded-2xl bg-paper p-4">
-                  <p className={subLabel}>文字框尺寸</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <label className="text-xs text-black/55">
-                      寬度 (mm)
-                      <input type="number" aria-label="文字框寬度" min={MIN_TEXT_BOX_MM} max={FRAME_WIDTH_MM} step={0.5} value={Number(state.text.widthMm.toFixed(1))}
-                        onChange={e => { if (e.target.value) onUpdateState({ text: { ...state.text, widthMm: Math.max(MIN_TEXT_BOX_MM, Math.min(FRAME_WIDTH_MM, Number(e.target.value))) } }); }}
-                        className={inputClass} />
-                    </label>
-                    <label className="text-xs text-black/55">
-                      高度 (mm)
-                      <input type="number" aria-label="文字框高度" min={MIN_TEXT_BOX_MM} max={FRAME_HEIGHT_MM} step={0.5} value={Number(state.text.heightMm.toFixed(1))}
-                        onChange={e => { if (e.target.value) onUpdateState({ text: { ...state.text, heightMm: Math.max(MIN_TEXT_BOX_MM, Math.min(FRAME_HEIGHT_MM, Number(e.target.value))) } }); }}
-                        className={inputClass} />
-                    </label>
+                      className="w-full accent-pink-500" />
                   </div>
-                  <label className="flex cursor-pointer items-center justify-between gap-3 text-sm font-medium text-ink">
-                    <span>自動換行</span>
-                    <input type="checkbox" role="switch" aria-label="自動換行" checked={state.text.autoWrap ?? false}
-                      onChange={e => onUpdateState({ text: { ...state.text, autoWrap: e.target.checked } })}
-                      className="peer sr-only" />
-                    <span aria-hidden="true" className="relative h-6 w-10 rounded-full bg-black/15 transition-colors duration-300 ease-out after:absolute after:left-1 after:top-1 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform after:duration-300 after:ease-out peer-checked:bg-ink peer-checked:after:translate-x-4 peer-focus-visible:ring-2 peer-focus-visible:ring-ink peer-focus-visible:ring-offset-2" />
-                  </label>
-                  <p className="text-xs text-black/45">
-                    {state.text.autoWrap ? '已開啟：文字依框寬自動換行。' : '單行模式：文字不因框寬不足而換行。'}
-                    選取展示框上的文字框後，可拖曳控制點調整尺寸；框尺寸與字體大小分開控制。
-                  </p>
                 </div>
 
-                <Tip>你也可以在中央展示框上，直接按住文字拖曳到任何位置。</Tip>
+                {/* Font Choices */}
+                <div>
+                  <label className="text-xs font-semibold text-stone-700 block mb-1.5">
+                    風格字型選擇：
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {FONT_OPTIONS.map((f) => {
+                      const isSelected = state.text.font === f.id;
+                      return (
+                        <button
+                          key={f.id}
+                          onClick={() =>
+                            onUpdateState({
+                              text: { ...state.text, font: f.id, isSpecialFont: f.isSpecial }
+                            })
+                          }
+                          className={`p-2.5 rounded-xl border text-left transition-all ${
+                            isSelected
+                              ? 'border-pink-500 bg-pink-500/10'
+                              : 'border-stone-200 bg-stone-50 hover:border-stone-200'
+                          }`}
+                        >
+                          <span className={`text-xs font-bold text-stone-800 block ${f.fontClass}`}>
+                            {f.name}
+                          </span>
+                          <span className="text-[11px] text-brand block mt-0.5">
+                            {f.isSpecial ? '特殊設計字體' : '基本字體'}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
 
+                {/* Text Color Swatches */}
+                <div>
+                  <label className="text-xs font-semibold text-stone-700 block mb-1.5">
+                    文字字體色彩：
+                  </label>
+                  <div className="flex items-center gap-2">
+                    {[
+                      { hex: '#ffffff', name: '純白' },
+                      { hex: '#12141a', name: '曜石黑' },
+                      { hex: '#fda4af', name: '櫻粉' },
+                      { hex: '#fcd34d', name: '香檳金' },
+                      { hex: '#67e8f9', name: '冰川藍' },
+                      { hex: '#c084fc', name: '電馭紫' }
+                    ].map((c) => (
+                      <button
+                        key={c.hex}
+                        onClick={() =>
+                          onUpdateState({
+                            text: { ...state.text, color: c.hex }
+                          })
+                        }
+                        className={`w-7 h-7 rounded-full border transition-transform ${
+                          state.text.color === c.hex
+                            ? 'scale-125 border-white ring-2 ring-pink-400'
+                            : 'border-stone-200 hover:scale-110'
+                        }`}
+                        style={{ background: c.hex }}
+                        title={c.name}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-emerald-800 bg-emerald-500/10 border border-emerald-500/20 p-2 rounded-lg leading-relaxed">
+                  💡 <strong>拖曳提示</strong>：您也可以直接在中央展示框中，用滑鼠直接按住文字拖曳至任意喜歡的位置！
+                </p>
+
+                </>}
               </div>
             )}
           </div>

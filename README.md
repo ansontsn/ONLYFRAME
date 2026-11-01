@@ -1,30 +1,43 @@
-# ONLYFRAME v2
+# ONLYFRAME v3 — 本機改版
 
-這是 ONLYFRAME 原始 React/Vite 專案的改版，保留既有客製編輯器、即時預覽、送件與管理功能，並更新消費者首頁與設計流程。
+保留來源 `../onlyframe-v3-landing-backup`，本資料夾為獨立的 React + TypeScript + Tailwind 改版。本機驗證記錄見 `qa/`；GitHub 推送與線上部署狀態需分別確認。
 
-## 本機啟動
+## 啟動
 
-```bash
-npm install
+```powershell
+cd 'D:\Users\User\Documents\ChatGPT\畢業專題\onlyframe-v3-redesign'
+npm ci
 npm run dev
 ```
 
-## 建置
+已安裝依賴時，直接執行 `npm run dev`。開啟終端機印出的本機網址。
 
-```bash
+```powershell
+npm test
 npm run build
+npm run preview
 ```
 
-Vite 產物輸出至 `dist/`。Netlify 建置指令使用 `npm run build`，發布目錄使用 `dist`；`public/_redirects` 已包含 SPA 路徑回退設定。
+`dist/` 是可執行的建置產物，請透過 HTTP 預覽。不要直接用檔案網址開啟 `dist/index.html`。
 
-若要啟用 Supabase，依照 [雲端設定指引](supabase/SETUP.md) 初始化資料表與網站管理者，複製 `.env.example` 為 `.env.local`，填入 `VITE_SUPABASE_URL` 與 `VITE_SUPABASE_PUBLISHABLE_KEY`。舊版 `VITE_SUPABASE_ANON_KEY` 仍可使用。不要將 `.env.local` 或服務端密鑰提交到 Git；已發布網站也需要在代管平台設定同名環境變數並重新部署。
+## 改版
 
-## 改版內容
+- 暖白、深灰、莓紅的共用按鈕、字體、邊框、留白與響應式配置。
+- 首頁使用既有卡片及共用 `AcrylicFramePreview` 製作完整框體示意；首屏色票可實際更新框色。設計範例皆標示概念示意。
+- 三種方案使用同卡、同角度、同尺寸的預覽及相同卡片份量。權限與降級確認規則沿用原程式。
+- 桌機約 60% 預覽／40% 淺色工具面板。五個工具入口不橫向捲動；尺寸及配置摘要可展開；文字細節隨選取狀態出現。
+- 手機採正常頁面流動，提供預覽／工具跳轉入口，確認及下載按鈕不固定遮擋內容。
+- 確認頁可展開完整文字、貼飾配置與毫米座標，返回修改會保留設計。PNG 匯出使用成品顯示並等待字體就緒。
+- 主要導覽為設計靈感／開始設計／關於 ONLYFRAME；後台入口移至頁尾。
 
-- 更新首頁主視覺、價值主張與一致的「開始設計」行動按鈕。
-- 增加一般展示與 ONLYFRAME 概念的示意比較、三步設計流程、方案功能比較、風格案例、規格與材質說明。
-- 方案選擇、設計編輯、預覽確認頁增加流程進度提示，可返回修改。
-- 保留原有客製化編輯器、方案功能權限、圖片預覽匯出、設計送件、Supabase 與管理頁功能。
-- 網站功能、尺寸與製造方式為研究 Prototype 測試內容。
+## 驗證與限制
 
-首頁風格照片沿用原專案內的示例圖片，不代表實際 ONLYFRAME 成品。
+詳細結果、截圖與原始機器報告請見 `qa/VALIDATION.md`、`qa/browser-results.json`、`qa/`。
+
+瀏覽器驗證使用本機 Chrome headless，包含手機觸控模擬。`scripts/preview-qa.mjs` 需 Playwright；本機使用 Codex 已附的執行環境，不新增專案依賴。其他環境可透過 `PLAYWRIGHT_MODULE` 指定模組路徑，`CHROME_PATH` 指定 Chrome。
+
+該腳本會攔截所有 Supabase 網路請求。提交及設計編號的完整流程僅在第二個隔離 Vite 執行個體測試，透過執行期的編譯定義使用既有本機展示儲存；不改寫任何 `.env`，也不寫入正式資料庫。
+
+Supabase 設定、schema、權限程式與資料序列化維持來源版本。本機成功不代表正式雲端送件、正式後台授權、實際產品材質或製程已驗證。
+
+首頁小卡圖片沿用來源專案，不代表實體 ONLYFRAME 成品。產品尺寸、材質、厚度、結構與適配性均待實體驗證。本網站為畢業專題研究原型，非實際販售。

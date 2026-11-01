@@ -1,0 +1,16 @@
+{
+  "source": "D:\\Users\\User\\Documents\\ChatGPT\\畢業專題\\onlyframe-v3-landing-backup",
+  "backupFilesVerified": 96,
+  "protectedFilesUnchanged": [
+    "src/lib/supabase.ts",
+    "src/types/index.ts",
+    "src/data/tiers.ts",
+    "src/utils/dimensions.ts",
+    "src/utils/textBox.ts",
+    "src/utils/supabaseConfig.ts",
+    ".env",
+    ".env.local",
+    "supabase/schema.sql",
+    "supabase/setup-admin.sql"
+  ]
+}

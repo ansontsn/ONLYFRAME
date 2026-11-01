@@ -1,0 +1,389 @@
+{
+  "source": "D:\\Users\\User\\Documents\\ChatGPT\\畢業專題\\onlyframe-v3-landing-backup",
+  "files": [
+    {
+      "file": ".env",
+      "sha256": "7f3ce3bb948d2499fc3b03013c96f283a69421c2fc60735ecc53192c827d4deb"
+    },
+    {
+      "file": ".env.example",
+      "sha256": "2545ae0d999bd8edf7c675f868cfa56cb7256cb38d4a0a7ac94e19873ae8c4a4"
+    },
+    {
+      "file": ".env.local",
+      "sha256": "331b6cdf3cd3bcd9380e1684cc85a512ae1fcac03ccd67070e53ac1c0cd17d29"
+    },
+    {
+      "file": ".gitignore",
+      "sha256": "5418f023e27177ecb8936a57eb2b9bd964d35f8b22c6f0166643d5c6b419b066"
+    },
+    {
+      "file": "index.html",
+      "sha256": "b42f9494d30345847b7222c3bb224adf63c30e2d4bb1f151b528b08ca28966d7"
+    },
+    {
+      "file": "package-lock.json",
+      "sha256": "fb11906c7cbdd92d576e3732b48ce1c4a93f6c74290272b1910ed32e637ec052"
+    },
+    {
+      "file": "package.json",
+      "sha256": "6e2fcbe3ad4024819d8a7b42789544e9d88d794aab88ea914da19e821f8bdb7f"
+    },
+    {
+      "file": "pnpm-lock.yaml",
+      "sha256": "7780800c5942a24eb1ca194dcdb64eec9390fbe5aeec97078d3c8df8105113fd"
+    },
+    {
+      "file": "pnpm-workspace.yaml",
+      "sha256": "ac02d96368617c760f093cfe61fdec64b6244007ab3553e0d6621f706f54a353"
+    },
+    {
+      "file": "postcss.config.js",
+      "sha256": "190c877db466995bf1482f4a16abd06e04a89ede3119341e2a86ff96e1737b27"
+    },
+    {
+      "file": "public/cards/anime.jpg",
+      "sha256": "4e644979552e4a9d0ed446a3d7182bf687ee00cda0b17e4e940a4ae936852508"
+    },
+    {
+      "file": "public/cards/game.jpg",
+      "sha256": "b87ffc7f8778dfe09d4e549a337485664eb618058ecb0d3fbd0a609eedd46ab4"
+    },
+    {
+      "file": "public/cards/kpop.jpg",
+      "sha256": "b0208d80b57f6449367b5267d39e57e80c6c06be3b49ca965b6cdd19ed8672a6"
+    },
+    {
+      "file": "public/favicon.png",
+      "sha256": "3e278809ae36061074e4edeac525f932090e3ac70a36b3cddd9dbde193b2afc3"
+    },
+    {
+      "file": "public/logo-combination-dark.png",
+      "sha256": "06b05e60c19a798728c6a1d72298f232d09ae6ed73f87f335c214bff40bedf02"
+    },
+    {
+      "file": "public/logo-combination-trimmed-white.png",
+      "sha256": "fe613b6081df1cf267041a6aa82fc873da30b20c4a7bc3aec8cd72892ffa8000"
+    },
+    {
+      "file": "public/logo-combination-white.png",
+      "sha256": "89a91b006df641076211cd89eb607ed5cb7b93258a5ef2f8a46df8aed825f1b0"
+    },
+    {
+      "file": "public/logo-combination.png",
+      "sha256": "c31501df9129574368697bdaff8483c6b25f2d445d204586d1264b8c5e105d35"
+    },
+    {
+      "file": "public/logo.png",
+      "sha256": "3e278809ae36061074e4edeac525f932090e3ac70a36b3cddd9dbde193b2afc3"
+    },
+    {
+      "file": "public/stickers/pastel/blossom.png",
+      "sha256": "190766660e0cfa15fe373cd91ee92fe2bd1f1f2aca7d1482466335370876db53"
+    },
+    {
+      "file": "public/stickers/pastel/bow.png",
+      "sha256": "69db5dc316ceecdc5ca8aca86128430e1c4efb56f42c1fd289ce58f40b3f3703"
+    },
+    {
+      "file": "public/stickers/pastel/corner.png",
+      "sha256": "8abb04af298d23214605587cc73654f1bd6b6720f97f4aace6842cb0c6cd3efa"
+    },
+    {
+      "file": "public/stickers/pastel/crescent.png",
+      "sha256": "929838cb2e58ab013a9380840d609b42c0a13c52185334f467deebf021b20552"
+    },
+    {
+      "file": "public/stickers/pastel/gem.png",
+      "sha256": "2dedfc771a11d8f5338c80ec2ac2c5cab89969deefb860c67f2ca87e665fc915"
+    },
+    {
+      "file": "public/stickers/pastel/heart.png",
+      "sha256": "cb7c7c3c49bcefeb59eaa3fe75a55e82048c6e0df600d389da9024742f38c72c"
+    },
+    {
+      "file": "public/stickers/pastel/orbit.png",
+      "sha256": "503c654f2e84fea28a013a124ae6d79d5db4f2e8801241077cd38a6f38ea8a15"
+    },
+    {
+      "file": "public/stickers/pastel/pearl-arc.png",
+      "sha256": "1eaf5854587d0f5bb954384be7dea74e45d627828585c55de2a0424dad9d43ea"
+    },
+    {
+      "file": "public/stickers/pastel/rosebud.png",
+      "sha256": "36ca7047043ed940718095f47fc5141368e16a5987dd22f7615f290ae59ef557"
+    },
+    {
+      "file": "public/stickers/pastel/sparkle.png",
+      "sha256": "bc33302b4f0d77bcafe3f60db6958037348203c0b0bf7ad2ac076293397f6d09"
+    },
+    {
+      "file": "public/stickers/pastel/star-charm.png",
+      "sha256": "1ea1eee9f7827e082ceff0026fb31c7e3ac2576ee615b21d4ed66d6b8b195972"
+    },
+    {
+      "file": "public/stickers/pastel/star-cluster.png",
+      "sha256": "957ceea2e664c96ead798c53ac4195936b26f3433b401d96ede37d6e85dc443d"
+    },
+    {
+      "file": "public/stickers/pearl/blossom.png",
+      "sha256": "dda42fad4a61e9f8573eeed94c19e41cd5495b9921bb68c5c352d0e44fff6c1f"
+    },
+    {
+      "file": "public/stickers/pearl/bow.png",
+      "sha256": "1d15c883bd76b65ed65397ee592034dcd8b8ccae269570f2ff37bd04296f8a84"
+    },
+    {
+      "file": "public/stickers/pearl/corner.png",
+      "sha256": "611abb23466b7a218f335c85979ea0590c4a267a71a01b2826afd9e510458a6d"
+    },
+    {
+      "file": "public/stickers/pearl/crescent.png",
+      "sha256": "c0785bb8ce6867ff45d92113f334516eaefd669dbac762601d3db5df22b65d45"
+    },
+    {
+      "file": "public/stickers/pearl/gem.png",
+      "sha256": "61b6d17f6baee2847e21bd164b87418712ca1cb0b98ecb5e09905c9a7051fb76"
+    },
+    {
+      "file": "public/stickers/pearl/heart.png",
+      "sha256": "4f6e8495e698da2d12869d98ac128dcfed853ab37a2fe7244dac1fa749b574ab"
+    },
+    {
+      "file": "public/stickers/pearl/orbit.png",
+      "sha256": "7d35025a015991290680c6245bb8459714f4479bad483a03383a2afc4c22a449"
+    },
+    {
+      "file": "public/stickers/pearl/pearl-arc.png",
+      "sha256": "0ef21a8010e82a5e6d690252f6ddbd327d49c85eb097a3e9ab31453c5b065f6f"
+    },
+    {
+      "file": "public/stickers/pearl/rosebud.png",
+      "sha256": "3ebd09dd96bdd0635630d5113b3a9592cd01199dca4706482bb5b4c12459a5b5"
+    },
+    {
+      "file": "public/stickers/pearl/sparkle.png",
+      "sha256": "70f1f0722cc82cc1a50ace10ba2ffbd13b8061f6ed093094570abf417770bf7c"
+    },
+    {
+      "file": "public/stickers/pearl/star-cluster.png",
+      "sha256": "ad8553392e9fcf59940862ae1e723945bd74a48a49f183a094d616d736a2d615"
+    },
+    {
+      "file": "public/stickers/pearl/wing.png",
+      "sha256": "f6ef5b14251383e07823e53b4b5988c0f53af1893b3ac296ba0394ced5e8912c"
+    },
+    {
+      "file": "public/_redirects",
+      "sha256": "66584af744075248a042165adbdbd6a0551fa708a85650ea1e3e777eee17080c"
+    },
+    {
+      "file": "push_to_github.bat",
+      "sha256": "a5888beef3197511407bbd3d5cc242b3ec7c379f42a6b209b62c0a5fd2cf8015"
+    },
+    {
+      "file": "README.md",
+      "sha256": "53601a9704b1eb3d7e6a694a7514be391fb1727e72f378e6449c4ee3b4c0cb0b"
+    },
+    {
+      "file": "scripts/check-cloud-config.mjs",
+      "sha256": "a1571245617d0a00851839069547024db958b83bc6be604c132dce207e228a3a"
+    },
+    {
+      "file": "src/App.tsx",
+      "sha256": "fcf7badffc210178598a9422b85ffaab22a23da64fd454e4c343bf7836c49001"
+    },
+    {
+      "file": "src/assets/cards/anime.jpg",
+      "sha256": "4e644979552e4a9d0ed446a3d7182bf687ee00cda0b17e4e940a4ae936852508"
+    },
+    {
+      "file": "src/assets/cards/game.jpg",
+      "sha256": "b87ffc7f8778dfe09d4e549a337485664eb618058ecb0d3fbd0a609eedd46ab4"
+    },
+    {
+      "file": "src/assets/cards/kpop.jpg",
+      "sha256": "b0208d80b57f6449367b5267d39e57e80c6c06be3b49ca965b6cdd19ed8672a6"
+    },
+    {
+      "file": "src/assets/logo-combination-dark.png",
+      "sha256": "06b05e60c19a798728c6a1d72298f232d09ae6ed73f87f335c214bff40bedf02"
+    },
+    {
+      "file": "src/assets/logo-combination-trimmed-white.png",
+      "sha256": "fe613b6081df1cf267041a6aa82fc873da30b20c4a7bc3aec8cd72892ffa8000"
+    },
+    {
+      "file": "src/assets/logo-combination-white.png",
+      "sha256": "89a91b006df641076211cd89eb607ed5cb7b93258a5ef2f8a46df8aed825f1b0"
+    },
+    {
+      "file": "src/assets/logo-combination.png",
+      "sha256": "c31501df9129574368697bdaff8483c6b25f2d445d204586d1264b8c5e105d35"
+    },
+    {
+      "file": "src/assets/logo.png",
+      "sha256": "3e278809ae36061074e4edeac525f932090e3ac70a36b3cddd9dbde193b2afc3"
+    },
+    {
+      "file": "src/components/AboutSection.tsx",
+      "sha256": "1d9af04251c8860b7e328567b14fc615c6e61d3d74fc081e45ee6781c1232bbb"
+    },
+    {
+      "file": "src/components/AcrylicFramePreview.tsx",
+      "sha256": "dc16c5df508ed8df81a0ed0dff99003f7ef20e456d5d7b2634f1c77d29e1ad23"
+    },
+    {
+      "file": "src/components/admin/AdminDashboard.tsx",
+      "sha256": "12ae880d306c8ef3004ab5af8a4ae121217dc43d6dda89c5e73be4e89741d471"
+    },
+    {
+      "file": "src/components/admin/AdminLogin.tsx",
+      "sha256": "432897ed59dc24af736582d9c997123e692ef653834953d37a60d1848e8f126a"
+    },
+    {
+      "file": "src/components/admin/SubmissionDetailModal.tsx",
+      "sha256": "3921f58dab1e500f3afdc15de14be36f66ca48477b84f18e25b415bc4f6eb47f"
+    },
+    {
+      "file": "src/components/CustomizerTools.tsx",
+      "sha256": "56dfb8645925614a66d6e27b3b1791ee61c85248ae81cc72b6a8d477260467d0"
+    },
+    {
+      "file": "src/components/DesignConfirmation.tsx",
+      "sha256": "8094d1f41b7f1f094763d0a697cb4ee30c0a105b56fd4a9b432fff4fdc22e77b"
+    },
+    {
+      "file": "src/components/DesignProgress.tsx",
+      "sha256": "595a00c355edf2c74c587a94180439ba068a5e859416391f4204a1c4507a3795"
+    },
+    {
+      "file": "src/components/DesignSummary.tsx",
+      "sha256": "ad19de721fc20bcf9980b61bb7e1e710c732225a971a16c6df2a19d91be4da82"
+    },
+    {
+      "file": "src/components/EditableTextObject.tsx",
+      "sha256": "fc7c345fe72322202cf70862513946bc9d7c1984f718e0f72e0909f14e9e6bb2"
+    },
+    {
+      "file": "src/components/HeroSection.tsx",
+      "sha256": "c61d9584a09eba6ac83926c586ed36f342b59eb29eb25ca0b47aafc8c93f9806"
+    },
+    {
+      "file": "src/components/HowItWorksModal.tsx",
+      "sha256": "2078d50e5c39563188a1ee843ef7c3aa26bb65ccfd5e3bc7feafcfe2b05682ec"
+    },
+    {
+      "file": "src/components/landing/Reveal.tsx",
+      "sha256": "449140dd605221175348724d25ace62a17dafc3def4d84573ff7927f79dd4532"
+    },
+    {
+      "file": "src/components/landing/TaglineReveal.tsx",
+      "sha256": "e850e54e886968f82688893ea35df72b0e3d53559627a8eddbdeb970ba78d2ff"
+    },
+    {
+      "file": "src/components/MobileStickyBar.tsx",
+      "sha256": "15530b347d3a6a9739440fe3d700faa0a06ab773a6c945ca68bc4586dcea4dd1"
+    },
+    {
+      "file": "src/components/Navbar.tsx",
+      "sha256": "0900335f133a130952455dab6e154413f1d45e4cc534d3888cf2343fae72adec"
+    },
+    {
+      "file": "src/components/StickerArtwork.tsx",
+      "sha256": "0f109927966639b2aa1bec43c885011d6e8f7ae5bb42270ab17e3813701d4514"
+    },
+    {
+      "file": "src/components/SubmissionSuccessView.tsx",
+      "sha256": "c2cba3f89a007f9d50fc47832ee2bd00e21f7fcedb58d5d6e7f02228c54c60aa"
+    },
+    {
+      "file": "src/components/SubmitDesignModal.tsx",
+      "sha256": "9feb068398f8219e0cc354d57f6404a40906feba5cb029f5134937b051a1d31a"
+    },
+    {
+      "file": "src/components/TierSelector.tsx",
+      "sha256": "ea48310ebee12ef74ec85958c8ea96d30ca73f4a132e85cfc3abaf39789c4af9"
+    },
+    {
+      "file": "src/data/options.ts",
+      "sha256": "32df732583313ad0af8c1ca86e8bf7846533e5e6f1b0410de0f921f4a941fd4a"
+    },
+    {
+      "file": "src/data/tiers.ts",
+      "sha256": "81b0c2ad3f2d550fce825facec36ac52ed274088f198e88416cb50df4ec6c5ab"
+    },
+    {
+      "file": "src/index.css",
+      "sha256": "b80c7948a7f40cc532e04c0005da821d4b253439749252c692a9ce27d853a96f"
+    },
+    {
+      "file": "src/lib/supabase.ts",
+      "sha256": "7ba806e7edd7ef20554b419a1f911764eda93f108380df9d13b355b74a1034b9"
+    },
+    {
+      "file": "src/main.tsx",
+      "sha256": "5f49dce6e6cc4b5d678cf529ef892af0ab7dfa6afb300b11ad559224019b8b05"
+    },
+    {
+      "file": "src/types/index.ts",
+      "sha256": "b00bd8e603d825c3586e46cc344006a8158038f1c9009eb244a16ce632cda8f3"
+    },
+    {
+      "file": "src/utils/dimensions.ts",
+      "sha256": "51d11234afc74d0accd272152921d5e8b4f5e6095862e5c11fea70a23091806a"
+    },
+    {
+      "file": "src/utils/supabaseConfig.ts",
+      "sha256": "d705c85fd6412d515d92d3b5996185001b2b01acc6cc9a51520bf142ff9f0466"
+    },
+    {
+      "file": "src/utils/textBox.ts",
+      "sha256": "dd2b3325b91ce447587caa9e688931c07fcee6c892fd3d1c6cfd9e5000e10463"
+    },
+    {
+      "file": "src/vite-env.d.ts",
+      "sha256": "4f93cb0b4de2c0148a4f588e08be25a6f0e9eaf0943720ac42ff886b333b4522"
+    },
+    {
+      "file": "supabase/schema.sql",
+      "sha256": "b9db6ca7ee80584d8784ff224ea4b82548a3b8ee29e135eb277e919edb6d43d8"
+    },
+    {
+      "file": "supabase/setup-admin.sql",
+      "sha256": "3519ebd5c7e25867cd7980b86fea161bfcfe886cd8fa1e4368e8313c557417ea"
+    },
+    {
+      "file": "supabase/SETUP.md",
+      "sha256": "15e4b5e691068cdf6215f70542d95b8dab552eb0ef2f5af072e3804f9948cb78"
+    },
+    {
+      "file": "tailwind.config.js",
+      "sha256": "832ad232a131590657cd008b8ae79777b4e72e1b1aa96c8feabf2f216dc34e11"
+    },
+    {
+      "file": "tests/supabase-config.test.mjs",
+      "sha256": "4878a6c4ed0e049fb4caad756c5e1e3c0a2aca12f6730d0cf16b19e0ca526ed4"
+    },
+    {
+      "file": "tests/text-box.test.mjs",
+      "sha256": "8ba99010e1f25f6ce4e2679bf78e6079e43f85cad233e1b9c33c363580305ad5"
+    },
+    {
+      "file": "tests/tiers.test.mjs",
+      "sha256": "c37526332f8203769d7345ff4d3683efd111e53ea4fd7002f569af641d18f5ae"
+    },
+    {
+      "file": "tsconfig.json",
+      "sha256": "3dbbde6e820d93d3bc05d0c54de9aba50d39b9e7fb6b736713a60a2edf5a17af"
+    },
+    {
+      "file": "vercel.json",
+      "sha256": "87627e61962fd77e81e07eecab8a764b50e0e16d1b10e4ab0c91b13b3c93fc9a"
+    },
+    {
+      "file": "vite.config.ts",
+      "sha256": "9aa38e7368bfe261037295f9a484056c6479e459436231ffa41c43f0b2550eb7"
+    }
+  ]
+}

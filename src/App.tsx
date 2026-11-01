@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { CustomizationTier, CustomizerState, TextConfig } from './types';
 import { PRESET_PHOTOCARDS, INITIAL_TEXT_CONFIG } from './data/options';
-import { TIER_OPTIONS, getTierSwitchWarning, normalizeDesignForTier } from './data/tiers';
+import { getTierSwitchWarning, normalizeDesignForTier } from './data/tiers';
 import { AppView, Navbar } from './components/Navbar';
-import { HeroSection } from './components/HeroSection';
+import { HeroSection, LandingStart } from './components/HeroSection';
 import { TierSelector } from './components/TierSelector';
 import { CustomizerTools } from './components/CustomizerTools';
 import { AcrylicFramePreview } from './components/AcrylicFramePreview';
@@ -11,14 +11,12 @@ import { DesignSummary } from './components/DesignSummary';
 import { DesignConfirmation } from './components/DesignConfirmation';
 import { HowItWorksModal } from './components/HowItWorksModal';
 import { AboutSection } from './components/AboutSection';
-import { MobileStickyBar } from './components/MobileStickyBar';
 import { DesignProgress } from './components/DesignProgress';
 import { SubmitDesignModal } from './components/SubmitDesignModal';
 import { SubmissionSuccessView } from './components/SubmissionSuccessView';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { DesignSubmission } from './types';
-import { ArrowRight, DownloadSimple } from '@phosphor-icons/react';
-import { arrowNudge, btnPrimarySm, btnSecondarySm } from './components/ui';
+import { Download, Loader2, ArrowRight } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { getCardAnchorMm, isCardSizeSupported } from './utils/dimensions';
 
@@ -83,7 +81,7 @@ export const App: React.FC = () => {
     photocardName: PRESET_PHOTOCARDS[0].name,
     isCustomPhoto: false,
     stickers: [],
-    text: INITIAL_TEXT_CONFIG
+    text: { ...INITIAL_TEXT_CONFIG, color: '#141414' }
   });
 
   // Active selected sticker for rotation/size inspector
@@ -149,6 +147,23 @@ export const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Landing presets replace the current design. With a tier the editor opens directly;
+  // without one the visitor still picks a plan, and the tier page warns before dropping content.
+  const handleStartFromLanding = (start?: LandingStart) => {
+    if (start?.state) {
+      const tier = start.tier ?? start.state.tier;
+      setCustomizerState(normalizeDesignForTier({ ...start.state, tier }));
+      setSelectedStickerId(null);
+      setIsTextSelected(false);
+    }
+    if (start?.tier) {
+      setCurrentView('customizer');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      handleNavigate('tiers');
+    }
+  };
+
   const [isDownloadingLive, setIsDownloadingLive] = useState(false);
 
   const handleDownloadLiveMockup = async () => {
@@ -157,6 +172,7 @@ export const App: React.FC = () => {
     setIsDownloadingLive(true);
     try {
       await new Promise(r => setTimeout(r, 120));
+      await document.fonts.ready;
       const node = document.getElementById('acrylic-display-frame');
       if (!node) {
         alert('找不到展示框元件，請重新整理頁面。');
@@ -184,7 +200,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-paper text-ink flex flex-col pb-32 lg:pb-0">
+    <div className="min-h-screen bg-paper text-ink flex flex-col">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-xl focus:bg-ink focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
@@ -208,7 +224,7 @@ export const App: React.FC = () => {
         {/* VIEW 1: HOME LANDING PAGE */}
         {currentView === 'home' && (
           <HeroSection
-            onStartCustomizing={() => handleNavigate('tiers')}
+            onStart={handleStartFromLanding}
             onOpenHowItWorks={() => setIsHowItWorksOpen(true)}
           />
         )}
@@ -225,48 +241,13 @@ export const App: React.FC = () => {
           </>
         )}
 
-        {/* VIEW 3: CORE CUSTOMIZER (3-COLUMN DESKTOP / STACKED MOBILE) */}
         {currentView === 'customizer' && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-            
-            {/* Top customizer breadcrumb bar */}
-            <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="rounded-full bg-ink px-2 py-1 font-mono text-xs font-semibold text-white">
-                  {customizerState.tier}
-                </span>
-                <span className="text-sm text-black/60">
-                  <span className="font-semibold text-ink">{TIER_OPTIONS[customizerState.tier].name}</span>
-                  ：{TIER_OPTIONS[customizerState.tier].summary}
-                </span>
-              </div>
-
-              <button
-                onClick={() => handleNavigate('tiers')}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-black/55 transition-colors duration-300 ease-out hover:bg-black/5 hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
-              >
-                更換方案
-              </button>
-            </div>
-
+          <div className="page-width studio-page">
             <DesignProgress activeStep={2} />
-
-            {/* Main 3-Column Studio Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              
-              {/* Column 1: Left Tools (4 cols) */}
-              <div className="lg:col-span-4 order-2 lg:order-1 h-[620px] lg:sticky lg:top-24">
-                <CustomizerTools
-                  state={customizerState}
-                  onUpdateState={handleUpdateState}
-                  onUpgradeTier={handleSelectTier}
-                  selectedStickerId={selectedStickerId}
-                  onSelectSticker={handleSelectSticker}
-                />
-              </div>
-
-              {/* Column 2: Center Acrylic Frame Live Preview (4 cols) */}
-              <div className="lg:col-span-4 order-1 lg:order-2 flex flex-col items-center justify-center min-h-[500px] lg:sticky lg:top-24">
+            <div className="studio-heading"><div><p className="eyebrow">YOUR PERSONAL FRAME STUDIO</p><h1>把喜歡，放進框裡。</h1></div><button className="text-link" onClick={() => handleNavigate('tiers')}>{customizerState.tier} · 更換方案 →</button></div>
+            <div className="studio-grid">
+              <section id="studio-preview" className="studio-preview" aria-label="即時設計預覽">
+                <div className="preview-heading"><span><span className="brand-dot" /> LIVE PREVIEW</span><span>隨著每一步，即時呈現</span></div>
                 <AcrylicFramePreview
                   state={customizerState}
                   onUpdateStickerPosition={handleUpdateStickerPosition}
@@ -278,54 +259,29 @@ export const App: React.FC = () => {
                   onSelectText={handleSelectText}
                   onDeselect={() => { setIsTextSelected(false); setSelectedStickerId(null); }}
                   interactive={true}
+                  exporting={isDownloadingLive}
                 />
-                <div className="mt-4 flex w-full max-w-sm items-center justify-center gap-2 px-2">
-                  <button
-                    onClick={handleDownloadLiveMockup}
-                    disabled={isDownloadingLive}
-                    aria-busy={isDownloadingLive}
-                    className={`flex-1 ${btnSecondarySm}`}
-                    title="匯出當前卡框高畫質 PNG 圖片"
-                  >
-                    {isDownloadingLive ? (
-                      <span className="inline-flex items-center gap-2">
-                        <span className="h-4 w-4 animate-pulse rounded bg-black/10" aria-hidden="true" />
-                        正在產生圖片
-                      </span>
-                    ) : (
-                      <>
-                        <DownloadSimple weight="bold" className="h-4 w-4" />
-                        下載 PNG
-                      </>
-                    )}
-                  </button>
-
-                  <button
-                    onClick={() => handleNavigate('confirmation')}
-                    className={`flex-1 ${btnPrimarySm}`}
-                  >
-                    完成設計
-                    <ArrowRight weight="bold" className={arrowNudge} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Column 3: Right Design Summary (4 cols) */}
-              <div className="hidden lg:block lg:col-span-4 order-3 h-[580px] lg:sticky lg:top-24">
-                <DesignSummary
+                <p className="preview-hint">在編輯模式中，點選文字或貼飾即可拖曳調整。</p>
+                <a href="#studio-tools" className="mobile-jump">前往目前工具 ↓</a>
+              </section>
+              <div id="studio-tools" className="studio-tools-column">
+                <div className="tool-panel-wrap"><CustomizerTools
                   state={customizerState}
-                  onFinishDesign={() => handleNavigate('confirmation')}
-                />
+                  onUpdateState={handleUpdateState}
+                  onUpgradeTier={handleSelectTier}
+                  selectedStickerId={selectedStickerId}
+                  onSelectSticker={handleSelectSticker}
+                  isTextSelected={isTextSelected}
+                  onSelectText={handleSelectText}
+                /></div>
+                <details className="studio-summary"><summary>目前設計配置 <span>展開查看</span></summary><DesignSummary state={customizerState} /></details>
+                <div className="studio-actions">
+                  <button onClick={() => handleNavigate('confirmation')} className="btn-primary w-full">預覽並確認 <ArrowRight size={17} /></button>
+                  <button onClick={handleDownloadLiveMockup} disabled={isDownloadingLive} className="btn-secondary w-full">{isDownloadingLive ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}{isDownloadingLive ? '正在產生圖片…' : '下載設計 PNG'}</button>
+                </div>
+                <a href="#studio-preview" className="mobile-jump">↑ 返回即時預覽</a>
               </div>
-
             </div>
-
-            {/* Mobile Bottom Sticky Bar */}
-            <MobileStickyBar
-              tier={customizerState.tier}
-              onFinishDesign={() => handleNavigate('confirmation')}
-            />
-
           </div>
         )}
 
@@ -394,11 +350,11 @@ export const App: React.FC = () => {
           <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-12 sm:px-6 md:flex-row md:items-start md:justify-between">
             <div className="max-w-sm">
               <img src="/logo-combination.png" alt="ONLYFRAME" className="h-8 w-auto object-contain" />
-              <p className="mt-4 text-sm text-black/55">
-                K-pop 與二次元收藏小卡客製化展示框互動平台。
+              <p className="mt-4 text-sm text-stone-600">
+                為 K-pop、動漫與遊戲收藏者打造的客製化展示框研究原型。
               </p>
-              <p className="mt-2 text-xs text-black/40">
-                企管系畢業專題研究原型 · 網站功能與產品規格為研究測試內容
+              <p className="mt-2 text-xs text-stone-600">
+                非實際販售。畫面皆為概念效果示意；尺寸、材質、製程與適配性仍待實體打樣驗證。
               </p>
             </div>
             <nav aria-label="頁尾導覽" className="grid grid-cols-2 gap-x-12 gap-y-3 text-sm">
@@ -413,7 +369,7 @@ export const App: React.FC = () => {
                   key={view}
                   onClick={() => handleNavigate(view)}
                   aria-current={currentView === view ? 'page' : undefined}
-                  className="justify-self-start rounded text-black/55 transition-colors duration-300 ease-out hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-paper aria-[current=page]:font-semibold aria-[current=page]:text-ink"
+                  className="justify-self-start rounded text-stone-600 transition-colors duration-300 ease-out hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-paper aria-[current=page]:font-semibold aria-[current=page]:text-ink"
                 >
                   {label}
                 </button>
@@ -421,7 +377,7 @@ export const App: React.FC = () => {
             </nav>
           </div>
           <div className="border-t border-black/5">
-            <p className="mx-auto max-w-6xl px-4 py-6 text-xs text-black/40 sm:px-6">© 2026 ONLYFRAME 畢業專題研究團隊</p>
+            <p className="mx-auto max-w-6xl px-4 py-6 text-xs text-stone-600 sm:px-6">© 2026 ONLYFRAME 畢業專題研究團隊</p>
           </div>
         </footer>
       )}

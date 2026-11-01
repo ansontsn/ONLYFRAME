@@ -94,7 +94,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({
         </ol>
 
         <div className="mt-8 flex flex-col-reverse items-start justify-between gap-4 border-t border-black/5 pt-6 sm:flex-row sm:items-center">
-          <span className="text-xs text-black/40">企管系畢業專題原型概念平台</span>
+          <span className="text-xs text-stone-600">企管系畢業專題原型概念平台</span>
           <button
             onClick={() => {
               onClose();

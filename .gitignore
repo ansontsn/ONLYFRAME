@@ -26,3 +26,6 @@ push_to_github.bat
 *.njsproj
 *.sln
 *.sw?
+
+# Browser QA runtime cache
+qa/.vite-demo/

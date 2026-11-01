@@ -88,7 +88,7 @@ export const EditableTextObject: React.FC<EditableTextObjectProps> = ({ text, sc
         fontSize: mmToPx(text.fontSizeMm, scale), color: text.color, fontFamily: text.font,
         zIndex: text.zIndex || 30, transform: `translate(-50%, -50%) rotate(${text.rotation}deg)`,
         lineHeight: 1.4, overflow: 'visible',
-        textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 0 12px rgba(255, 255, 255, 0.4)',
+        textShadow: '0 1px 2px rgba(255, 255, 255, 0.4)',
       }}
       title={editable ? '選取文字框，拖曳移動或使用控制點調整尺寸' : undefined}
     >

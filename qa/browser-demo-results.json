@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-11-01T12:34:16.293Z",
+  "checks": [
+    {
+      "name": "isolated local demo submission preserves schema, millimetres, PNG and design code",
+      "result": "pass",
+      "evidence": {
+        "code": "DES-20261101-3E5A59D6543B"
+      }
+    },
+    {
+      "name": "isolated demo admin reads submitted local record and opens design details",
+      "result": "pass"
+    },
+    {
+      "name": "no application errors; zero production write attempts",
+      "result": "pass"
+    }
+  ],
+  "cloudRequestsBlocked": [],
+  "errors": []
+}

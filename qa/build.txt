@@ -1,0 +1,22 @@
+
+> photocard-frame-customizer@0.1.0 build
+> node scripts/check-cloud-config.mjs && tsc && vite build
+
+Supabase: cloud configuration validated (public key only).
+vite v5.4.21 building for production...
+transforming...
+✓ 6186 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   1.46 kB │ gzip:   0.81 kB
+dist/assets/kpop-CeNOVP3m.jpg    28.37 kB
+dist/assets/game-B7oXHjyo.jpg   110.52 kB
+dist/assets/anime-Dl41ROUk.jpg  166.84 kB
+dist/assets/index-DQuxIuOU.css   73.38 kB │ gzip:  14.31 kB
+dist/assets/index-DN_usIAi.js   537.30 kB │ gzip: 155.46 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 8.07s

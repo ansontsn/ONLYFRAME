@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CustomizerState, DesignSubmission } from '../types';
 import { submitDesignToBackend, dataUrlToBlob } from '../lib/supabase';
 import { toPng } from 'html-to-image';
 import { getTierLabel, TIER_OPTIONS } from '../data/tiers';
 import { isCardSizeSupported } from '../utils/dimensions';
-import { ArrowRight, ShieldCheck, WarningCircle, X } from '@phosphor-icons/react';
-import { arrowNudge, btnPrimary, btnSecondary, focusRing } from './ui';
+import { X, Loader2, AlertCircle, ShieldCheck, ArrowRight } from 'lucide-react';
 
 interface SubmitDesignModalProps {
   isOpen: boolean;
@@ -15,8 +14,8 @@ interface SubmitDesignModalProps {
 }
 
 const fieldClass = (invalid: boolean) =>
-  `mt-2 w-full rounded-xl border bg-white px-3 py-2 text-base text-ink outline-none transition-colors duration-300 ease-out placeholder:text-black/30 disabled:opacity-50 ${
-    invalid ? 'border-red-400 focus:border-red-600 focus:ring-1 focus:ring-red-600' : 'border-black/10 focus:border-ink focus:ring-1 focus:ring-ink'
+  `mt-2 w-full rounded-xl border bg-white px-3.5 py-2.5 text-base text-ink outline-none transition-colors placeholder:text-stone-400 disabled:opacity-50 ${
+    invalid ? 'border-red-400 focus:border-red-600' : 'border-stone-300 focus:border-brand'
   }`;
 
 export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
@@ -31,6 +30,38 @@ export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
   const [loadingStep, setLoadingStep] = useState('正在儲存你的專屬設計……');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const isSubmittingRef = useRef(false);
+  isSubmittingRef.current = isSubmitting;
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  // Esc closes, Tab stays inside the dialog, and focus returns to the opener on close.
+  useEffect(() => {
+    if (!isOpen) return;
+    const opener = document.activeElement as HTMLElement | null;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    nameInputRef.current?.focus();
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isSubmittingRef.current) onCloseRef.current();
+      if (e.key !== 'Tab' || !dialogRef.current) return;
+      const focusable = dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled])');
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+      opener?.focus();
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -69,16 +100,16 @@ export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitError(null);
     if (!validate()) return;
 
     setIsSubmitting(true);
+    setSubmitError(null);
     setLoadingStep('正在儲存你的專屬設計……');
 
     try {
       // 1. 嘗試產生立體卡框 Preview Blob (藉由 html-to-image)
       let previewBlob: Blob | null = null;
-      setLoadingStep('正在產生展示框預覽圖……');
+      setLoadingStep('正在產生設計示意圖……');
       const node = document.getElementById('acrylic-display-frame');
       if (node) {
         try {
@@ -117,64 +148,71 @@ export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
   const emailInvalid = validationErrors.some((e) => e.includes('信箱'));
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+      onClick={() => { if (!isSubmitting) onClose(); }}
+      role="presentation"
+    >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="submit-design-title"
+        onClick={(e) => e.stopPropagation()}
         className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-6 shadow-[0_40px_120px_-40px_rgba(0,0,0,0.5)] sm:p-8"
       >
         <button
+          type="button"
+          aria-label="關閉提交視窗"
           onClick={onClose}
           disabled={isSubmitting}
-          aria-label="關閉"
-          className={`absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full text-black/50 transition-colors duration-300 ease-out hover:bg-black/5 hover:text-ink disabled:opacity-30 ${focusRing}`}
+          className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 hover:text-ink disabled:opacity-30"
         >
-          <X weight="bold" className="h-5 w-5" />
+          <X className="h-5 w-5" />
         </button>
 
-        <p className="text-xs font-semibold uppercase tracking-widest text-brand">送出設計</p>
-        <h2 id="submit-design-title" className="mt-2 pr-12 text-2xl font-bold tracking-tight text-ink">
+        <p className="eyebrow">SUBMIT YOUR DESIGN</p>
+        <h2 id="submit-design-title" className="mt-2 pr-12 text-2xl font-semibold tracking-tight text-ink">
           確認送出你的專屬卡框
         </h2>
-        <p className="mt-2 text-sm text-black/55">
-          系統會為你產生專屬設計編號，並把完整設計參數保存到資料庫，供後續打樣評估。
+        <p className="mt-2 text-sm text-stone-600">
+          系統會為你產生專屬設計編號，並保存完整設計參數供專題研究使用。
         </p>
 
         {validationErrors.length > 0 && (
           <div role="alert" className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
             <p className="flex items-center gap-2 font-semibold">
-              <WarningCircle weight="bold" className="h-4 w-4 shrink-0" />
+              <AlertCircle className="h-4 w-4 shrink-0" />
               請完成以下項目後再送出
             </p>
             <ul className="mt-2 list-inside list-disc space-y-1 text-red-700">
-              {validationErrors.map((err, idx) => (
-                <li key={idx}>{err}</li>
+              {validationErrors.map((err) => (
+                <li key={err}>{err}</li>
               ))}
             </ul>
           </div>
         )}
 
         <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-4">
-
           <div className="flex items-center justify-between gap-3 rounded-2xl bg-paper p-4 text-sm">
             <div>
-              <span className="block text-xs text-black/40">方案配置</span>
+              <span className="block text-xs text-stone-500">方案配置</span>
               <span className="font-semibold text-ink">{getTierLabel(state.tier)}</span>
             </div>
             <div className="text-right">
-              <span className="block text-xs text-black/40">客製程度</span>
-              <span className="font-semibold text-ink">{TIER_OPTIONS[state.tier].level}</span>
+              <span className="block text-xs text-stone-500">客製程度</span>
+              <span className="font-semibold text-brand-deep">{TIER_OPTIONS[state.tier].level}</span>
             </div>
           </div>
 
           <label className="block text-sm font-medium text-ink">
             聯絡姓名 <span className="text-brand" aria-hidden="true">*</span>
             <input
+              ref={nameInputRef}
               type="text"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
-              placeholder="例如：林品妤"
+              placeholder="例如：王小明"
               disabled={isSubmitting}
               required
               aria-invalid={nameInvalid}
@@ -189,7 +227,7 @@ export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
               type="email"
               value={customerEmail}
               onChange={(e) => setCustomerEmail(e.target.value)}
-              placeholder="例如：pinyu.lin@mail.ntust.edu.tw"
+              placeholder="例如：student@university.edu.tw"
               disabled={isSubmitting}
               required
               aria-invalid={emailInvalid}
@@ -198,32 +236,31 @@ export const SubmitDesignModal: React.FC<SubmitDesignModalProps> = ({
             />
           </label>
 
-          <p className="flex items-start gap-2 rounded-xl bg-paper p-3 text-xs text-black/55">
-            <ShieldCheck weight="duotone" className="h-4 w-4 shrink-0 text-ink" />
+          <p className="prototype-note flex items-start gap-2">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-stone-500" />
             本系統為企管系畢業專題研究原型，送出的設計資料僅作為打樣分析，不會進行任何扣款或商業用途。
           </p>
 
           {submitError && <p role="alert" className="text-sm font-medium text-red-700">{submitError}</p>}
 
           <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row">
-            <button type="button" onClick={onClose} disabled={isSubmitting} className={`sm:flex-1 ${btnSecondary}`}>
+            <button type="button" onClick={onClose} disabled={isSubmitting} className="btn-secondary sm:flex-1">
               稍後再送
             </button>
-            <button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className={`sm:flex-[2] ${btnPrimary} disabled:opacity-100`}>
+            <button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className="btn-primary sm:flex-[2]">
               {isSubmitting ? (
-                <span className="inline-flex items-center gap-2 text-sm">
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-white" aria-hidden="true" />
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   {loadingStep}
-                </span>
+                </>
               ) : (
                 <>
                   確認送出設計
-                  <ArrowRight weight="bold" className={arrowNudge} />
+                  <ArrowRight className="h-4 w-4" />
                 </>
               )}
             </button>
           </div>
-
         </form>
       </div>
     </div>
